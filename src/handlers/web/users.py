@@ -1,7 +1,7 @@
 import webapp2
 from webapp2_extras.security import generate_password_hash, check_password_hash
 
-from gaesessions import get_current_session
+from gaesessions import get_current_session, set_current_session
 
 from model.user import User
 from config import PEPPER
@@ -24,7 +24,8 @@ class CustomLoginHandler(webapp2.RequestHandler):
         return check_password_hash(password, password_hash, pepper=PEPPER)
 
     def set_session(self, email):
-        pass
+        session = get_current_session()
+        session['email'] = email
 
     def get(self):
         email = self.request.get('email')
@@ -32,6 +33,11 @@ class CustomLoginHandler(webapp2.RequestHandler):
         if self.check_password(email, password):
             self.set_session(email)
 
+class CheckSessionHandler(webapp2.RequestHandler):
+    def get(self):
+        session = get_current_session()
+        self.response.write(session['email'] if session.has_key('email') else 'no key')
 
 application = webapp2.WSGIApplication([('/users/signup', SignupHandler),
-                                       ('/users/custom/login', CustomLoginHandler)], debug=True)
+                                       ('/users/custom/login', CustomLoginHandler),
+                                       ('/users/checksession', CheckSessionHandler)], debug=True)
