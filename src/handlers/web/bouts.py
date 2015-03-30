@@ -11,6 +11,7 @@ from google.appengine.ext.webapp import blobstore_handlers
 from model.user import User
 from model.bout import Bout
 from model.photo import Photo
+from model.vote import Vote
 
 class CreateBoutHandler(webapp2.RequestHandler):
     def create_bout(self, user, name, period):
@@ -29,22 +30,22 @@ class CreateBoutHandler(webapp2.RequestHandler):
         self.response.out.write(template.render(path, template_values))
 
 class AddPhotoHandler(blobstore_handlers.BlobstoreUploadHandler):
-    def create_photo(self, bout, user, image_blob_key):
-        Photo(parent=bout, user=user, image=image_blob_key).put()
-
-    def get(self):
-        upload_url = blobstore.create_upload_url('/bouts/photos/get')
-        template_values = {'upload_url': upload_url}
-        path = 'templates/add_photo.html'
-        self.response.out.write(template.render(path, template_values))
+    def create_photo(self, bout, email, image_blob_key):
+        Photo(key_name=email, parent=bout, image=image_blob_key).put()
 
     def post(self):
         email = self.request.get('email')
         bout_id = long(self.request.get('bout_id'))
         image_blob_key = str(self.get_uploads('image')[0].key())
-        user = User.get_by_key_name(email)
         bout = Bout.get_by_id(bout_id)
-        self.create_photo(bout, user, image_blob_key)
+        self.create_photo(bout, email, image_blob_key)
+
+    def get(self):
+        upload_url = blobstore.create_upload_url('/bouts/photos/add')
+        template_values = {'upload_url': upload_url}
+        path = 'templates/add_photo.html'
+        self.response.out.write(template.render(path, template_values))
+
 
 class GetPhotoHandler(blobstore_handlers.BlobstoreDownloadHandler):
     def get(self):
@@ -70,9 +71,19 @@ class GetBoutsHandler(webapp2.RequestHandler):
             response.append(bout_json)
         self.response.write(json.dumps(response))
 
+class PhotoVoteHandler(webapp2.RequestHandler):
+    def create_vote(self, email, photo):
+        Vote(key_name=email, parent=photo).put()
 
+    def post(self):
+        email = self.request.get('email')
+        bout_id = long(self.request.get('bout_id'))
+        bout = Bout.get_by_id(bout_id)
+        photo = Bout.get_by_key_name(email, parent=bout)
+        self.create_vote(email, photo)
 
 application = webapp2.WSGIApplication([ ('/bouts/create', CreateBoutHandler),
                                         ('/bouts/get', GetBoutsHandler),
                                         ('/bouts/photos/add', AddPhotoHandler),
-                                        ('/bouts/photos/get', GetPhotoHandler)], debug=True)
+                                        ('/bouts/photos/get', GetPhotoHandler),
+                                        ('/bouts/photos/vote', PhotoVoteHandler)], debug=True)
