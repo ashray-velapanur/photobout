@@ -33,7 +33,7 @@ class AddPhotoHandler(blobstore_handlers.BlobstoreUploadHandler):
         Photo(parent=bout, user=user, image=image_blob_key).put()
 
     def get(self):
-        upload_url = blobstore.create_upload_url('/bouts/add_photo')
+        upload_url = blobstore.create_upload_url('/bouts/photos/get')
         template_values = {'upload_url': upload_url}
         path = 'templates/add_photo.html'
         self.response.out.write(template.render(path, template_values))
@@ -64,7 +64,7 @@ class GetBoutsHandler(webapp2.RequestHandler):
             photos = Photo.all().ancestor(bout)
             for photo in photos:
                 photo_json = {}
-                photo_json['image'] = '/bouts/photo?blob_key=' + photo.image
+                photo_json['image'] = '/bouts/photos/get?blob_key=' + photo.image
                 photo_json['owner'] = photo.user.name
                 bout_json['photos'].append(photo_json)
             response.append(bout_json)
@@ -74,5 +74,5 @@ class GetBoutsHandler(webapp2.RequestHandler):
 
 application = webapp2.WSGIApplication([ ('/bouts/create', CreateBoutHandler),
                                         ('/bouts/get', GetBoutsHandler),
-                                        ('/bouts/add_photo', AddPhotoHandler),
-                                        ('/bouts/photo', GetPhotoHandler)], debug=True)
+                                        ('/bouts/photos/add', AddPhotoHandler),
+                                        ('/bouts/photos/get', GetPhotoHandler)], debug=True)
