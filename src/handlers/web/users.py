@@ -42,7 +42,13 @@ class LoginHandler(webapp2.RequestHandler):
         user_id = self.request.get('user_id')
         profile_url = 'https://graph.facebook.com/me?access_token=%s'
         response = json.loads(urlfetch.fetch(profile_url%access_token).content)
-        self.response.write(response)
+        email = response['email']
+        name = response['name']
+        user = User.get_by_key_name(email)
+        if not user:
+            user = User(key_name=email, name=name).put()
+        ThirdPartyUser(key_name='FB', parent=user, access_token=access_token).put()
+        self.set_session(email)
 
     def get(self, network):
         if network == 'custom':
@@ -56,6 +62,5 @@ class CheckSessionHandler(webapp2.RequestHandler):
         self.response.write(session['email'] if session.has_key('email') else 'no key')
 
 application = webapp2.WSGIApplication([('/users/signup', SignupHandler),
-                                       #('/users/custom/login', CustomLoginHandler),
                                        ('/users/([^/]+)/login', LoginHandler),
                                        ('/users/checksession', CheckSessionHandler)], debug=True)
