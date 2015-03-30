@@ -7,3 +7,6 @@ threadsafe: false
 handlers:
 - url: /users/.*
   script: handlers.web.users.application
+
+- url: /bouts/.*
+  script: handlers.web.bouts.application
