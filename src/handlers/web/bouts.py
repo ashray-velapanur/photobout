@@ -71,7 +71,7 @@ class GetBoutsHandler(webapp2.RequestHandler):
             for photo in photos:
                 photo_json = {}
                 photo_json['image'] = '/bouts/photos/get?blob_key=' + photo.image
-                photo_json['owner'] = photo.parent().name
+                photo_json['owner'] = photo.key().name()
                 photo_json['is_voted'] = self.is_voted(photo, email)
                 bout_json['photos'].append(photo_json)
             response.append(bout_json)
@@ -83,9 +83,10 @@ class PhotoVoteHandler(webapp2.RequestHandler):
 
     def post(self):
         email = self.request.get('email')
+        owner_email = self.request.get('owner_email')
         bout_id = long(self.request.get('bout_id'))
         bout = Bout.get_by_id(bout_id)
-        photo = Photo.get_by_key_name(email, parent=bout)
+        photo = Photo.get_by_key_name(owner_email, parent=bout)
         self.create_vote(email, photo)
 
 application = webapp2.WSGIApplication([ ('/bouts/create', CreateBoutHandler),
