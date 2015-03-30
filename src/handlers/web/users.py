@@ -56,7 +56,7 @@ class LoginHandler(webapp2.RequestHandler):
         response['email'] = email
         return response
 
-    def get(self, network):
+    def post(self, network):
         if network == 'custom':
             response = self.handle_custom_login()
         elif network == 'facebook':

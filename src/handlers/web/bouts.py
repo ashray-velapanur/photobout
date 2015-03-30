@@ -25,12 +25,18 @@ class CreateBoutHandler(webapp2.RequestHandler):
 		self.response.out.write(template.render(path, template_values))
 
 class AddPhotoHandler(webapp2.RequestHandler):
+	def get(self):
+		template_values = {}
+		path = 'templates/add_photo.html'
+		self.response.out.write(template.render(path, template_values))
+
 	def post(self):
-		session = get_current_session()
-		email = session['email']
+		#session = get_current_session()
+		#email = session['email']
+		email = self.request.get('email')
 		bout_id = long(self.request.get('bout_id'))
-		user = User.get_by_key_name(email)
 		image = self.request.get('image')
+		user = User.get_by_key_name(email)
 		bout = Bout.get_by_id(bout_id)
 		Photo(parent=bout, user=user, image=image).put()
 
