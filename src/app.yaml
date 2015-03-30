@@ -10,3 +10,7 @@ handlers:
 
 - url: /bouts/.*
   script: handlers.web.bouts.application
+
+libraries:
+- name: django
+  version: "1.4"

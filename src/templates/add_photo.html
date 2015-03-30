@@ -1,7 +1,9 @@
-<form action="/bouts/add_photo" method="post" enctype="multipart/form-data">
+{% block Content %}
+<form action={{ upload_url }} method="post" enctype="multipart/form-data">
 	<input type="file" name="image" id="image">
 	<input type="text" name="name" id="name">
 	<input type="text" name="bout_id" id="bout_id">
 	<input type="text" name="email" id="email">
 	<input type="submit" value="Submit">
 </form>
+{% endblock %}
