@@ -54,11 +54,16 @@ class GetPhotoHandler(blobstore_handlers.BlobstoreDownloadHandler):
         self.send_blob(blob_info)
 
 class GetBoutsHandler(webapp2.RequestHandler):
+    def is_voted(self, photo, email):
+        return True if Vote.get_by_key_name(email, parent=photo) else False
+
     def get(self):
+        email = self.request.get('email')
         response = []
         bouts = Bout.all()
         for bout in bouts:
             bout_json = {}
+            bout_json['id'] = bout.key().id()
             bout_json['name'] = bout.name
             bout_json['time_left'] = bout.period
             bout_json['photos'] = []
@@ -66,7 +71,8 @@ class GetBoutsHandler(webapp2.RequestHandler):
             for photo in photos:
                 photo_json = {}
                 photo_json['image'] = '/bouts/photos/get?blob_key=' + photo.image
-                photo_json['owner'] = photo.user.name
+                photo_json['owner'] = photo.parent().name
+                photo_json['is_voted'] = self.is_voted(photo, email)
                 bout_json['photos'].append(photo_json)
             response.append(bout_json)
         self.response.write(json.dumps(response))
@@ -79,7 +85,7 @@ class PhotoVoteHandler(webapp2.RequestHandler):
         email = self.request.get('email')
         bout_id = long(self.request.get('bout_id'))
         bout = Bout.get_by_id(bout_id)
-        photo = Bout.get_by_key_name(email, parent=bout)
+        photo = Photo.get_by_key_name(email, parent=bout)
         self.create_vote(email, photo)
 
 application = webapp2.WSGIApplication([ ('/bouts/create', CreateBoutHandler),
