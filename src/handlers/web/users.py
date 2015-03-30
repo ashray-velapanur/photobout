@@ -32,29 +32,36 @@ class LoginHandler(webapp2.RequestHandler):
         session['email'] = email
 
     def handle_custom_login(self):
+        response = {}
         email = self.request.get('email')
         password = self.request.get('password')
         if self.check_password(email, password):
             self.set_session(email)
+        response['email'] = email
+        return response
 
     def handle_facebook_login(self):
+        response = {}
         access_token = self.request.get('access_token')
         user_id = self.request.get('user_id')
         profile_url = 'https://graph.facebook.com/me?access_token=%s'
-        response = json.loads(urlfetch.fetch(profile_url%access_token).content)
-        email = response['email']
-        name = response['name']
+        profile = json.loads(urlfetch.fetch(profile_url%access_token).content)
+        email = profile['email']
+        name = profile['name']
         user = User.get_by_key_name(email)
         if not user:
             user = User(key_name=email, name=name).put()
         ThirdPartyUser(key_name='FB', parent=user, access_token=access_token).put()
         self.set_session(email)
+        response['email'] = email
+        return response
 
     def get(self, network):
         if network == 'custom':
-            self.handle_custom_login()
+            response = self.handle_custom_login()
         elif network == 'facebook':
-            self.handle_facebook_login()
+            response = self.handle_facebook_login()
+        self.response.write(json.dumps(response))
 
 class CheckSessionHandler(webapp2.RequestHandler):
     def get(self):
