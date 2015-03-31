@@ -62,7 +62,7 @@ class GetPhotoHandler(blobstore_handlers.BlobstoreDownloadHandler):
 class GetBoutsHandler(webapp2.RequestHandler):
     def is_voted(self, photo, email):
         return True if Vote.get_by_key_name(email, parent=photo) else False
-
+    
     def get(self):
         user = session.get_user_from_session()
         if not user:
@@ -75,6 +75,7 @@ class GetBoutsHandler(webapp2.RequestHandler):
             bout_json['id'] = bout.key().id()
             bout_json['name'] = bout.name
             bout_json['time_left'] = bout.period
+            bout_json['num_comments'] = len(bout.comments)
             bout_json['photos'] = []
             photos = Photo.all().ancestor(bout)
             for photo in photos:
