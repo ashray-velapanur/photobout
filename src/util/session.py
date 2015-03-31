@@ -6,6 +6,10 @@ def get_user_from_session():
 	session = get_current_session()
 	return User.get_by_key_name(session['email']) if 'email' in session else None
 
+def set_session(email):
+    session = get_current_session()
+    session['email'] = email
+
 def _user_logged_in(handler):
     session = get_current_session()
     if session.is_active() and 'email' in session:
