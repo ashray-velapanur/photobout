@@ -81,6 +81,7 @@ class GetBoutsHandler(webapp2.RequestHandler):
                 photo_json['image'] = '/bouts/photos/get?blob_key=' + photo.image
                 photo_json['owner_email'] = owner.email
                 photo_json['owner_name'] = owner.name
+                photo_json['num_votes'] = len(photo.votes)
                 photo_json['is_voted'] = photo.is_voted(email)
                 bout_json['photos'].append(photo_json)
             response.append(bout_json)
