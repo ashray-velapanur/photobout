@@ -12,6 +12,7 @@ from model.user import User
 from model.bout import Bout
 from model.photo import Photo
 from model.vote import Vote
+from model.comment import Comment
 from util import session
 
 class CreateBoutHandler(webapp2.RequestHandler):
@@ -100,8 +101,27 @@ class PhotoVoteHandler(webapp2.RequestHandler):
         photo = Photo.get_by_key_name(owner_email, parent=bout)
         self.create_vote(email, photo)
 
+class AddCommentHandler(webapp2.RequestHandler):
+    def create_comment(self, user, bout, message):
+        Comment(parent=bout, user=user, message=message).put()
+
+    def post(self):
+        user = session.get_user_from_session()
+        if not user:
+            return
+        message = self.request.get('message')
+        bout_id = long(self.request.get('bout_id'))
+        bout = Bout.get_by_id(bout_id)
+        self.create_comment(user, bout, message)
+
+    def get(self):
+        template_values = {}
+        path = 'templates/add_comment.html'
+        self.response.out.write(template.render(path, template_values))
+
 application = webapp2.WSGIApplication([ ('/bouts/create', CreateBoutHandler),
                                         ('/bouts/get', GetBoutsHandler),
                                         ('/bouts/photos/add', AddPhotoHandler),
                                         ('/bouts/photos/get', GetPhotoHandler),
-                                        ('/bouts/photos/vote', PhotoVoteHandler)], debug=True)
+                                        ('/bouts/photos/vote', PhotoVoteHandler),
+                                        ('/bouts/comments/add', AddCommentHandler)], debug=True)
