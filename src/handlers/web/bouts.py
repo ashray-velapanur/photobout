@@ -76,9 +76,11 @@ class GetBoutsHandler(webapp2.RequestHandler):
             bout_json['photos'] = []
             photos = Photo.all().ancestor(bout)
             for photo in photos:
+                owner = User.get_by_key_name(photo.key().name())
                 photo_json = {}
                 photo_json['image'] = '/bouts/photos/get?blob_key=' + photo.image
-                photo_json['owner'] = photo.key().name()
+                photo_json['owner_email'] = owner.email
+                photo_json['owner_name'] = owner.name
                 photo_json['is_voted'] = photo.is_voted(email)
                 bout_json['photos'].append(photo_json)
             response.append(bout_json)
