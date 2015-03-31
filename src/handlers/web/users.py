@@ -8,6 +8,7 @@ from google.appengine.api import urlfetch
 
 from model.user import User
 from model.third_party_user import ThirdPartyUser
+from util.session import login_required
 from config import PEPPER
 
 class SignupHandler(webapp2.RequestHandler):
@@ -64,6 +65,7 @@ class LoginHandler(webapp2.RequestHandler):
         self.response.write(json.dumps(response))
 
 class CheckSessionHandler(webapp2.RequestHandler):
+    @login_required
     def get(self):
         session = get_current_session()
         self.response.write(session['email'] if session.has_key('email') else 'no key')
