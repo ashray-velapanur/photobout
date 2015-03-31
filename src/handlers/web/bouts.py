@@ -117,8 +117,23 @@ class AddCommentHandler(webapp2.RequestHandler):
         path = 'templates/add_comment.html'
         self.response.out.write(template.render(path, template_values))
 
+class LeaderboardHandler(webapp2.RequestHandler):
+    def get(self):
+        response = []
+        bout_id = long(self.request.get('bout_id'))
+        bout = Bout.get_by_id(bout_id)
+        photos = bout.photos
+        for photo in photos:
+            user_dict = {}
+            user_dict['votes_count'] = len(photo.votes)
+            user_dict['email'] = photo.key().name()
+            response.append(user_dict)
+        self.response.write(response)
+
+
 application = webapp2.WSGIApplication([ ('/bouts/create', CreateBoutHandler),
                                         ('/bouts/get', GetBoutsHandler),
+                                        ('/bouts/leaderboard', LeaderboardHandler),
                                         ('/bouts/photos/add', AddPhotoHandler),
                                         ('/bouts/photos/get', GetPhotoHandler),
                                         ('/bouts/photos/vote', PhotoVoteHandler),
