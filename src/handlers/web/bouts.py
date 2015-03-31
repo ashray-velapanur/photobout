@@ -12,16 +12,18 @@ from model.user import User
 from model.bout import Bout
 from model.photo import Photo
 from model.vote import Vote
+from util import session
 
 class CreateBoutHandler(webapp2.RequestHandler):
     def create_bout(self, user, name, period):
         Bout(owner=user, name=name, period=period).put()
 
     def post(self):
+        user = session.get_user_from_session()
+        if not user:
+            return
         name = self.request.get('name')
         period = self.request.get('period')
-        email = self.request.get('email')
-        user = User.get_by_key_name(email)
         self.create_bout(user, name, period)
 
     def get(self):
@@ -34,7 +36,10 @@ class AddPhotoHandler(blobstore_handlers.BlobstoreUploadHandler):
         Photo(key_name=email, parent=bout, image=image_blob_key).put()
 
     def post(self):
-        email = self.request.get('email')
+        user = session.get_user_from_session()
+        if not user:
+            return
+        email = user.key().name()
         bout_id = long(self.request.get('bout_id'))
         image_blob_key = str(self.get_uploads('image')[0].key())
         bout = Bout.get_by_id(bout_id)
@@ -58,7 +63,10 @@ class GetBoutsHandler(webapp2.RequestHandler):
         return True if Vote.get_by_key_name(email, parent=photo) else False
 
     def get(self):
-        email = self.request.get('email')
+        user = session.get_user_from_session()
+        if not user:
+            return
+        email = user.key().name()
         response = []
         bouts = Bout.all()
         for bout in bouts:
@@ -82,7 +90,10 @@ class PhotoVoteHandler(webapp2.RequestHandler):
         Vote(key_name=email, parent=photo).put()
 
     def post(self):
-        email = self.request.get('email')
+        user = session.get_user_from_session()
+        if not user:
+            return
+        email = user.key().name()
         owner_email = self.request.get('owner_email')
         bout_id = long(self.request.get('bout_id'))
         bout = Bout.get_by_id(bout_id)

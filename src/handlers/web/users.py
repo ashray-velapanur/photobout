@@ -15,7 +15,7 @@ class SignupHandler(webapp2.RequestHandler):
         password_hash = generate_password_hash(password, pepper=PEPPER)
         User(key_name=email, name=name, password=password_hash).put()
 
-    def get(self):
+    def post(self):
         email = self.request.get('email')
         name = self.request.get('name')
         password = self.request.get('password')
