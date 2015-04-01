@@ -10,5 +10,9 @@ class Photo(db.Model):
     def votes(self):
     	return Vote.all().ancestor(self).fetch(None)
 
+    @property
+    def owner_email(self):
+        return self.key().name()
+
     def is_voted(self, email):
         return True if Vote.get_by_key_name(email, parent=self) else False

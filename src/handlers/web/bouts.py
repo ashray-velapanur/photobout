@@ -128,9 +128,13 @@ class LeaderboardHandler(webapp2.RequestHandler):
         photos = bout.photos
         for photo in photos:
             user_dict = {}
-            user_dict['votes_count'] = len(photo.votes)
-            user_dict['email'] = photo.key().name()
+            owner_email = photo.owner_email
+            owner = User.get_by_key_name(owner_email)
+            user_dict['votes'] = len(photo.votes)
+            user_dict['email'] = owner_email
+            user_dict['name'] = owner.name
             response.append(user_dict)
+        sorted(response, key=lambda x: x['votes'], reverse=True)
         self.response.write(response)
 
 
