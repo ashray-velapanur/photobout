@@ -1,12 +1,18 @@
 from google.appengine.ext import db
 
+from flufl import enum
+
 from model.comment import Comment
 from model.photo import Photo
+from model.enum_property import EnumProperty
+
+Visibility =  enum.make("Visibility", ("PUBLIC", "PRIVATE"))
 
 class Bout(db.Model):
     name = db.StringProperty(indexed=False)
     owner = db.ReferenceProperty(indexed=False)
     period = db.StringProperty(indexed=False)
+    visibility = EnumProperty(Visibility)
 
     @property
     def comments(self):
@@ -14,4 +20,4 @@ class Bout(db.Model):
 
     @property
     def photos(self):
-    	return Photo.all().ancestor(self).fetch(None)
+        return Photo.all().ancestor(self).fetch(None)
