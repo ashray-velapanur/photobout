@@ -9,15 +9,15 @@ from google.appengine.ext.webapp import template
 from google.appengine.ext.webapp import blobstore_handlers
 
 from model.user import User
-from model.bout import Bout
+from model.bout import Bout, Visibility
 from model.photo import Photo
 from model.vote import Vote
 from model.comment import Comment
 from util import session
 
 class CreateBoutHandler(webapp2.RequestHandler):
-    def create_bout(self, user, name, period):
-        Bout(owner=user, name=name, period=period).put()
+    def create_bout(self, user, name, period, visibility):
+        Bout(owner=user, name=name, period=period, visibility=int(visibility)).put()
 
     def post(self):
         user = session.get_user_from_session()
@@ -25,7 +25,8 @@ class CreateBoutHandler(webapp2.RequestHandler):
             return
         name = self.request.get('name')
         period = self.request.get('period')
-        self.create_bout(user, name, period)
+        visibility = self.request.get('visibility')
+        self.create_bout(user, name, period, visibility)
 
     def get(self):
         template_values = {}
@@ -60,31 +61,34 @@ class GetPhotoHandler(blobstore_handlers.BlobstoreDownloadHandler):
         self.send_blob(blob_info)
 
 class GetBoutsHandler(webapp2.RequestHandler):
+    def get_dict(self, bout, email):
+        bout_dict = {}
+        bout_dict['id'] = bout.id
+        bout_dict['name'] = bout.name
+        bout_dict['time_left'] = bout.period
+        bout_dict['num_comments'] = len(bout.comments)
+        bout_dict['photos'] = []
+        for photo in bout.photos:
+            photo_dict = {}
+            photo_dict['image'] = photo.image_url
+            photo_dict['owner_email'] = photo.owner.email
+            photo_dict['owner_name'] = photo.owner.name
+            photo_dict['num_votes'] = len(photo.votes)
+            photo_dict['is_voted'] = photo.is_voted(email)
+            bout_dict['photos'].append(photo_dict)
+        return bout_dict
+
     def get(self):
         user = session.get_user_from_session()
         if not user:
             return
-        email = user.key().name()
+        email = user.email
         response = []
-        bouts = Bout.all()
-        for bout in bouts:
-            bout_json = {}
-            bout_json['id'] = bout.key().id()
-            bout_json['name'] = bout.name
-            bout_json['time_left'] = bout.period
-            bout_json['num_comments'] = len(bout.comments)
-            bout_json['photos'] = []
-            photos = Photo.all().ancestor(bout)
-            for photo in photos:
-                owner = User.get_by_key_name(photo.key().name())
-                photo_json = {}
-                photo_json['image'] = '/bouts/photos/get?blob_key=' + photo.image
-                photo_json['owner_email'] = owner.email
-                photo_json['owner_name'] = owner.name
-                photo_json['num_votes'] = len(photo.votes)
-                photo_json['is_voted'] = photo.is_voted(email)
-                bout_json['photos'].append(photo_json)
-            response.append(bout_json)
+        for bout in Bout.all():
+            if bout.visibility == Visibility.PRIVATE:
+                if bout.owner.email != user.email:
+                    continue
+            response.append(self.get_dict(bout, email))
         self.response.write(json.dumps(response))
 
 class PhotoVoteHandler(webapp2.RequestHandler):
