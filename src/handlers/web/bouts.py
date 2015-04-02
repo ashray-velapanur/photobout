@@ -139,7 +139,7 @@ class LeaderboardHandler(webapp2.RequestHandler):
             user_dict['email'] = owner_email
             user_dict['name'] = owner.name
             response.append(user_dict)
-        self.response.write(sorted(response, key=lambda x: x['votes'], reverse=True))
+        self.response.write(json.dumps(sorted(response, key=lambda x: x['votes'], reverse=True)))
 
 class InviteHandler(webapp2.RequestHandler):
     def post(self):
