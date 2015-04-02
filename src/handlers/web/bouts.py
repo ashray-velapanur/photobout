@@ -13,6 +13,7 @@ from model.bout import Bout, Permission
 from model.photo import Photo
 from model.vote import Vote
 from model.comment import Comment
+from model.invited import Invited
 from util import session, permission
 
 class CreateBoutHandler(webapp2.RequestHandler):
@@ -141,6 +142,17 @@ class LeaderboardHandler(webapp2.RequestHandler):
         sorted(response, key=lambda x: x['votes'], reverse=True)
         self.response.write(response)
 
+class InviteHandler(webapp2.RequestHandler):
+    def post(self):
+        email = self.request.get('email')
+        name = self.request.get('name')
+        bout_id = self.request.get('bout_id')
+        user = User.get_by_key_name(email)
+        if not user:
+            user = User(key_name=email, name=name).put()
+        Invited(key_name=bout_id, parent=user).put()
+        self.response.write(json.dumps('Invited '+email))
+
 
 class TestHandler(webapp2.RequestHandler):
     @permission.bout_permission_required
@@ -154,4 +166,5 @@ application = webapp2.WSGIApplication([ ('/bouts/create', CreateBoutHandler),
                                         ('/bouts/photos/add', AddPhotoHandler),
                                         ('/bouts/photos/get', GetPhotoHandler),
                                         ('/bouts/photos/vote', PhotoVoteHandler),
-                                        ('/bouts/comments/add', AddCommentHandler)], debug=True)
+                                        ('/bouts/comments/add', AddCommentHandler),
+                                        ('/bouts/invite', InviteHandler)], debug=True)
