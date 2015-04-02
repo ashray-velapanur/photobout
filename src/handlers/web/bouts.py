@@ -13,7 +13,7 @@ from model.bout import Bout, Permission
 from model.photo import Photo
 from model.vote import Vote
 from model.comment import Comment
-from util import session
+from util import session, permission
 
 class CreateBoutHandler(webapp2.RequestHandler):
     def create_bout(self, user, name, period, permission):
@@ -142,8 +142,14 @@ class LeaderboardHandler(webapp2.RequestHandler):
         self.response.write(response)
 
 
+class TestHandler(webapp2.RequestHandler):
+    @permission.bout_permission_required
+    def get(self):
+        pass
+
 application = webapp2.WSGIApplication([ ('/bouts/create', CreateBoutHandler),
                                         ('/bouts/get', GetBoutsHandler),
+                                        ('/bouts/test', TestHandler),
                                         ('/bouts/leaderboard', LeaderboardHandler),
                                         ('/bouts/photos/add', AddPhotoHandler),
                                         ('/bouts/photos/get', GetPhotoHandler),
