@@ -9,6 +9,7 @@ from google.appengine.ext.webapp import template
 from google.appengine.ext.webapp import blobstore_handlers
 
 from model.user import User
+from model.third_party_user import ThirdPartyUser
 from model.bout import Bout, Permission
 from model.photo import Photo
 from model.vote import Vote
@@ -76,6 +77,7 @@ class GetBoutsHandler(webapp2.RequestHandler):
             photo_dict['owner_name'] = photo.owner.name
             photo_dict['num_votes'] = len(photo.votes)
             photo_dict['is_voted'] = photo.is_voted(email)
+            photo_dict['facebook_id'] = ThirdPartyUser.get_by_key_name('FB', parent=photo.owner).id
             bout_dict['photos'].append(photo_dict)
         return bout_dict
 
@@ -133,11 +135,10 @@ class LeaderboardHandler(webapp2.RequestHandler):
         photos = bout.photos
         for photo in photos:
             user_dict = {}
-            owner_email = photo.owner_email
-            owner = User.get_by_key_name(owner_email)
             user_dict['votes'] = len(photo.votes)
-            user_dict['email'] = owner_email
-            user_dict['name'] = owner.name
+            user_dict['email'] = photo.owner_email
+            user_dict['name'] = photo.owner.name
+            user_dict['facebook_id'] = ThirdPartyUser.get_by_key_name('FB', parent=photo.owner).id
             response.append(user_dict)
         self.response.write(json.dumps(sorted(response, key=lambda x: x['votes'], reverse=True)))
 

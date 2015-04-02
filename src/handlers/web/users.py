@@ -50,10 +50,11 @@ class LoginHandler(webapp2.RequestHandler):
         profile = json.loads(urlfetch.fetch(profile_url%access_token).content)
         email = profile['email']
         name = profile['name']
+        id = profile['id']
         user = User.get_by_key_name(email)
         if not user:
             user = User(key_name=email, name=name).put()
-        ThirdPartyUser(key_name='FB', parent=user, access_token=access_token).put()
+        ThirdPartyUser(key_name='FB', parent=user, access_token=access_token, id=user_id).put()
         self.set_session(email)
         response['email'] = email
         return response
