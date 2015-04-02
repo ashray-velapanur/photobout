@@ -9,15 +9,15 @@ from google.appengine.ext.webapp import template
 from google.appengine.ext.webapp import blobstore_handlers
 
 from model.user import User
-from model.bout import Bout, Visibility
+from model.bout import Bout, Permission
 from model.photo import Photo
 from model.vote import Vote
 from model.comment import Comment
 from util import session
 
 class CreateBoutHandler(webapp2.RequestHandler):
-    def create_bout(self, user, name, period, visibility):
-        Bout(owner=user, name=name, period=period, visibility=int(visibility)).put()
+    def create_bout(self, user, name, period, permission):
+        Bout(owner=user, name=name, period=period, permission=int(permission)).put()
 
     def post(self):
         user = session.get_user_from_session()
@@ -25,8 +25,8 @@ class CreateBoutHandler(webapp2.RequestHandler):
             return
         name = self.request.get('name')
         period = self.request.get('period')
-        visibility = self.request.get('visibility')
-        self.create_bout(user, name, period, visibility)
+        permission = self.request.get('permission')
+        self.create_bout(user, name, period, permission)
 
     def get(self):
         template_values = {}
@@ -85,7 +85,7 @@ class GetBoutsHandler(webapp2.RequestHandler):
         email = user.email
         response = []
         for bout in Bout.all():
-            if bout.visibility == Visibility.PRIVATE:
+            if bout.permission == Permission.PRIVATE:
                 if bout.owner.email != user.email:
                     continue
             response.append(self.get_dict(bout, email))

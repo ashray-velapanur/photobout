@@ -7,13 +7,13 @@ from model.comment import Comment
 from model.photo import Photo
 from model.enum_property import EnumProperty
 
-Visibility =  enum.make("Visibility", ("PUBLIC", "PRIVATE"))
+Permission =  enum.make("Permission", ("PUBLIC", "PRIVATE"))
 
 class Bout(db.Model):
     name = db.StringProperty(indexed=False)
     owner = db.ReferenceProperty(indexed=False)
     period = db.StringProperty(indexed=False)
-    visibility = EnumProperty(Visibility)
+    permission = EnumProperty(Permission)
 
     @property
     def id(self):
