@@ -28,6 +28,8 @@ class CreateBoutHandler(webapp2.RequestHandler):
         name = self.request.get('name')
         period = self.request.get('period')
         permission = self.request.get('permission')
+        if not permission:
+            permission = Permission.PUBLIC
         self.create_bout(user, name, period, permission)
 
     def get(self):
