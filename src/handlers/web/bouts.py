@@ -135,15 +135,15 @@ class LeaderboardHandler(webapp2.RequestHandler):
         response = []
         bout_id = long(self.request.get('bout_id'))
         bout = Bout.get_by_id(bout_id)
-        photos = bout.photos
-        for photo in photos:
+        for rank, photo in enumerate(sorted(bout.photos, key=lambda x: len(x.votes), reverse=True), start=1):
             user_dict = {}
             user_dict['votes'] = len(photo.votes)
+            user_dict['rank'] = rank
             user_dict['email'] = photo.owner_email
             user_dict['name'] = photo.owner.name
             user_dict['facebook_id'] = ThirdPartyUser.get_by_key_name('FB', parent=photo.owner).id
             response.append(user_dict)
-        self.response.write(json.dumps(sorted(response, key=lambda x: x['votes'], reverse=True)))
+        self.response.write(json.dumps(response))
 
 class InviteHandler(webapp2.RequestHandler):
     def post(self):
