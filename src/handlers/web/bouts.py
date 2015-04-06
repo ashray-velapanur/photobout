@@ -16,6 +16,7 @@ from model.vote import Vote
 from model.comment import Comment
 from model.invited import Invited
 from util import session, permission
+from search_documents.user_document import create_user_search_document
 
 class CreateBoutHandler(webapp2.RequestHandler):
     def create_bout(self, user, name, period, permission):
@@ -151,7 +152,9 @@ class InviteHandler(webapp2.RequestHandler):
         bout_id = self.request.get('bout_id')
         user = User.get_by_key_name(email)
         if not user:
-            user = User(key_name=email, name=name).put()
+            user = User(key_name=email, name=name)
+            user.put()
+            create_user_search_document(user)
         Invited(key_name=bout_id, parent=user).put()
         self.response.write(json.dumps('Invited '+email))
 

@@ -9,13 +9,16 @@ from google.appengine.ext.webapp import template
 
 from model.user import User
 from model.third_party_user import ThirdPartyUser
+from search_documents.user_document import create_user_search_document
 from util import session
 from config import PEPPER
 
 class SignupHandler(webapp2.RequestHandler):
     def create_user(self, email, name, password):
         password_hash = generate_password_hash(password, pepper=PEPPER)
-        User(key_name=email, name=name, password=password_hash).put()
+        user = User(key_name=email, name=name, password=password_hash)
+        user.put()
+        create_user_search_document(user)
 
     def post(self):
         email = self.request.get('email')
@@ -53,7 +56,9 @@ class LoginHandler(webapp2.RequestHandler):
         id = profile['id']
         user = User.get_by_key_name(email)
         if not user:
-            user = User(key_name=email, name=name).put()
+            user = User(key_name=email, name=name)
+            user.put()
+            create_user_search_document(user)
         ThirdPartyUser(key_name='FB', parent=user, access_token=access_token, id=user_id).put()
         self.set_session(email)
         response['email'] = email
