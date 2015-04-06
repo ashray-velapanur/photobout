@@ -91,6 +91,7 @@ class ListUsersHandler(webapp2.RequestHandler):
         self.response.out.write(template.render(path, template_values))
 
 class LogoutHandler(webapp2.RequestHandler):
+    @session.login_required
     def post(self):
         session = get_current_session()
         session.terminate()

@@ -22,6 +22,7 @@ class CreateBoutHandler(webapp2.RequestHandler):
     def create_bout(self, user, name, period, permission):
         Bout(owner=user, name=name, period=period, permission=int(permission)).put()
 
+    @session.login_required
     def post(self):
         user = session.get_user_from_session()
         if not user:
@@ -42,6 +43,7 @@ class AddPhotoHandler(blobstore_handlers.BlobstoreUploadHandler):
     def create_photo(self, bout, email, image_blob_key):
         Photo(key_name=email, parent=bout, image=image_blob_key).put()
 
+    @session.login_required
     def post(self):
         user = session.get_user_from_session()
         if not user:
@@ -60,6 +62,7 @@ class AddPhotoHandler(blobstore_handlers.BlobstoreUploadHandler):
 
 
 class GetPhotoHandler(blobstore_handlers.BlobstoreDownloadHandler):
+    @session.login_required
     def get(self):
         blob_key = self.request.get('blob_key')
         blob_info = blobstore.BlobInfo.get(blob_key)
@@ -84,6 +87,7 @@ class GetBoutsHandler(webapp2.RequestHandler):
             bout_dict['photos'].append(photo_dict)
         return bout_dict
 
+    @session.login_required
     def get(self):
         user = session.get_user_from_session()
         if not user:
@@ -101,6 +105,7 @@ class PhotoVoteHandler(webapp2.RequestHandler):
     def create_vote(self, email, photo):
         Vote(key_name=email, parent=photo).put()
 
+    @session.login_required
     def post(self):
         user = session.get_user_from_session()
         if not user:
@@ -116,6 +121,7 @@ class AddCommentHandler(webapp2.RequestHandler):
     def create_comment(self, user, bout, message):
         Comment(parent=bout, user=user, message=message).put()
 
+    @session.login_required
     def post(self):
         user = session.get_user_from_session()
         if not user:
@@ -131,6 +137,7 @@ class AddCommentHandler(webapp2.RequestHandler):
         self.response.out.write(template.render(path, template_values))
 
 class LeaderboardHandler(webapp2.RequestHandler):
+    @session.login_required
     def get(self):
         response = []
         bout_id = long(self.request.get('bout_id'))
@@ -146,6 +153,7 @@ class LeaderboardHandler(webapp2.RequestHandler):
         self.response.write(json.dumps(response))
 
 class InviteHandler(webapp2.RequestHandler):
+    @session.login_required
     def post(self):
         email = self.request.get('email')
         name = self.request.get('name')
