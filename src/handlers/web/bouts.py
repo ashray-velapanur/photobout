@@ -149,7 +149,7 @@ class GetCommentsHandler(webapp2.RequestHandler):
             comment_dict['message'] = comment.message
             comment_dict['timestamp'] = comment.timestamp
             response.append(comment_dict)
-        self.response.write(response)
+        self.response.write(json.dumps(response))
 
 class LeaderboardHandler(webapp2.RequestHandler):
     @session.login_required
