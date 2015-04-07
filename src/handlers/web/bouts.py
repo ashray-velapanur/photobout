@@ -147,7 +147,7 @@ class GetCommentsHandler(webapp2.RequestHandler):
             comment_dict = {}
             comment_dict['name'] = comment.user.name
             comment_dict['message'] = comment.message
-            comment_dict['timestamp'] = comment.timestamp
+            comment_dict['timestamp'] = comment.timestamp.strftime('%x %X')
             response.append(comment_dict)
         self.response.write(json.dumps(response))
 
