@@ -1,6 +1,7 @@
 import webapp2
 import json
 import logging
+import datetime
 
 from gaesessions import get_current_session
 
@@ -119,7 +120,7 @@ class PhotoVoteHandler(webapp2.RequestHandler):
 
 class AddCommentHandler(webapp2.RequestHandler):
     def create_comment(self, user, bout, message):
-        Comment(parent=bout, user=user, message=message).put()
+        Comment(parent=bout, user=user, message=message, timestamp=datetime.datetime.now()).put()
 
     @session.login_required
     def post(self):
