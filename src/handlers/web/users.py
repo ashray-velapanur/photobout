@@ -4,12 +4,12 @@ from webapp2_extras.security import generate_password_hash, check_password_hash
 
 from gaesessions import get_current_session, set_current_session
 
-from google.appengine.api import urlfetch
+from google.appengine.api import urlfetch, search
 from google.appengine.ext.webapp import template
 
 from model.user import User
 from model.third_party_user import ThirdPartyUser
-from search_documents.user_document import create_user_search_document
+from search_documents.user_document import create_user_search_document, fetch
 from util import session
 from config import PEPPER
 
@@ -90,6 +90,12 @@ class ListUsersHandler(webapp2.RequestHandler):
         path = 'templates/list_users.html'
         self.response.out.write(template.render(path, template_values))
 
+class UsersSearchHandler(webapp2.RequestHandler):
+    def post(self):
+        search_string = self.request.get('search_string')
+        user_docs = fetch('(suggestions:"%s" OR name:"%s")' % (search_string, search_string), None, limit=100, sort_options=search.SortOptions(expressions=[search.SortExpression(expression='name', direction=search.SortExpression.ASCENDING)]))
+        self.response.write(json.dumps({'users': [{'name':user.name,'email':user.doc_id} for user in user_docs.results]}))
+
 class LogoutHandler(webapp2.RequestHandler):
     @session.login_required
     def post(self):
@@ -100,4 +106,5 @@ application = webapp2.WSGIApplication([ ('/users/signup', SignupHandler),
                                         ('/users/logout', LogoutHandler),
                                         ('/users/list', ListUsersHandler),
                                         ('/users/([^/]+)/login', LoginHandler),
-                                        ('/users/checksession', CheckSessionHandler)], debug=True)
+                                        ('/users/checksession', CheckSessionHandler),
+                                        ('/users/search', UsersSearchHandler)], debug=True)
