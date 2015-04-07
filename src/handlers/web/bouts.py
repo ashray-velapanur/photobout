@@ -137,6 +137,20 @@ class AddCommentHandler(webapp2.RequestHandler):
         path = 'templates/add_comment.html'
         self.response.out.write(template.render(path, template_values))
 
+class GetCommentsHandler(webapp2.RequestHandler):
+    @session.login_required
+    def get(self):
+        bout_id = long(self.request.get('bout_id'))
+        bout = Bout.get_by_id(bout_id)
+        response = []
+        for comment in bout.comments:
+            comment_dict = {}
+            comment_dict['name'] = comment.user.name
+            comment_dict['message'] = comment.message
+            comment_dict['timestamp'] = comment.timestamp
+            response.append(comment_dict)
+        self.response.write(response)
+
 class LeaderboardHandler(webapp2.RequestHandler):
     @session.login_required
     def get(self):
@@ -181,4 +195,5 @@ application = webapp2.WSGIApplication([ ('/bouts/create', CreateBoutHandler),
                                         ('/bouts/photos/get', GetPhotoHandler),
                                         ('/bouts/photos/vote', PhotoVoteHandler),
                                         ('/bouts/comments/add', AddCommentHandler),
+                                        ('/bouts/comments/get', GetCommentsHandler),
                                         ('/bouts/invite', InviteHandler)], debug=True)
