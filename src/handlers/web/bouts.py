@@ -40,19 +40,14 @@ class CreateBoutHandler(webapp2.RequestHandler):
         self.response.out.write(template.render(path, template_values))
 
 class AddPhotoHandler(blobstore_handlers.BlobstoreUploadHandler):
-    def create_photo(self, bout, email, image_blob_key):
-        Photo(key_name=email, parent=bout, image=image_blob_key).put()
-
     @session.login_required
     def post(self):
         user = session.get_user_from_session()
-        if not user:
-            return
         email = user.email
         bout_id = long(self.request.get('bout_id'))
         image_blob_key = str(self.get_uploads('image')[0].key())
         bout = Bout.get_by_id(bout_id)
-        self.create_photo(bout, email, image_blob_key)
+        Photo.create(bout, email, image_blob_key)
 
     @session.login_required
     def get(self):

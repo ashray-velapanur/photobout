@@ -7,6 +7,12 @@ class Photo(db.Model):
     user = db.ReferenceProperty(indexed=False)
     image = db.StringProperty(indexed=False)
 
+    @classmethod
+    def create(cls, bout, email, image_blob_key):
+        photo = Photo(key_name=email, parent=bout, image=image_blob_key)
+        photo.put()
+        return photo
+
     @property
     def votes(self):
         return Vote.all().ancestor(self).fetch(None)
