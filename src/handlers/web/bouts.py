@@ -20,9 +20,6 @@ from util import session, permission
 from search_documents.user_document import create_user_search_document
 
 class CreateBoutHandler(webapp2.RequestHandler):
-    def create_bout(self, user, name, period, permission):
-        Bout(owner=user, name=name, period=period, permission=int(permission)).put()
-
     @session.login_required
     def post(self):
         user = session.get_user_from_session()
@@ -33,7 +30,9 @@ class CreateBoutHandler(webapp2.RequestHandler):
         permission = self.request.get('permission')
         if not permission:
             permission = Permission.PUBLIC
-        self.create_bout(user, name, period, permission)
+        bout = Bout.create(user, name, period, permission)
+        response = {'id': bout.id}
+        self.response.write(json.dumps(response))
 
     def get(self):
         template_values = {}
@@ -49,17 +48,16 @@ class AddPhotoHandler(blobstore_handlers.BlobstoreUploadHandler):
         user = session.get_user_from_session()
         if not user:
             return
-        email = user.key().name()
+        email = user.email
         bout_id = long(self.request.get('bout_id'))
         image_blob_key = str(self.get_uploads('image')[0].key())
         bout = Bout.get_by_id(bout_id)
         self.create_photo(bout, email, image_blob_key)
 
+    @session.login_required
     def get(self):
-        upload_url = blobstore.create_upload_url('/bouts/photos/add')
-        template_values = {'upload_url': upload_url}
-        path = 'templates/add_photo.html'
-        self.response.out.write(template.render(path, template_values))
+        response = {'upload_url': blobstore.create_upload_url('/bouts/photos/add')}
+        self.response.write(json.dumps(response))
 
 
 class GetPhotoHandler(blobstore_handlers.BlobstoreDownloadHandler):

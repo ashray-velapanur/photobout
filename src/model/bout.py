@@ -15,6 +15,12 @@ class Bout(db.Model):
     period = db.StringProperty(indexed=False)
     permission = EnumProperty(Permission)
 
+    @classmethod
+    def create(cls, user, name, period, permission):
+        bout = Bout(owner=user, name=name, period=period, permission=int(permission))
+        bout.put()
+        return bout
+
     @property
     def id(self):
         return self.key().id()
