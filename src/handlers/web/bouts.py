@@ -55,6 +55,11 @@ class AddPhotoHandler(blobstore_handlers.BlobstoreUploadHandler):
         response = {'upload_url': blobstore.create_upload_url('/bouts/photos/add')}
         self.response.write(json.dumps(response))
 
+class AddPhotoPageHandler(webapp2.RequestHandler):
+    def get(self):
+        template_values = {'upload_url': blobstore.create_upload_url('/bouts/photos/add')}
+        path = 'templates/add_photo.html'
+        self.response.out.write(template.render(path, template_values))
 
 class GetPhotoHandler(blobstore_handlers.BlobstoreDownloadHandler):
     @session.login_required
@@ -192,6 +197,7 @@ application = webapp2.WSGIApplication([ ('/bouts/create', CreateBoutHandler),
                                         ('/bouts/test', TestHandler),
                                         ('/bouts/leaderboard', LeaderboardHandler),
                                         ('/bouts/photos/add', AddPhotoHandler),
+                                        ('/bouts/photos/add_page', AddPhotoPageHandler),
                                         ('/bouts/photos/get', GetPhotoHandler),
                                         ('/bouts/photos/vote', PhotoVoteHandler),
                                         ('/bouts/comments/add', AddCommentHandler),
