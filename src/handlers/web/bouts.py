@@ -41,6 +41,7 @@ class CreateBoutHandler(webapp2.RequestHandler):
 
 class AddPhotoHandler(blobstore_handlers.BlobstoreUploadHandler):
     @session.login_required
+    @permission.bout_permission_required
     def post(self):
         user = session.get_user_from_session()
         email = user.email
@@ -100,6 +101,7 @@ class PhotoVoteHandler(webapp2.RequestHandler):
         Vote(key_name=email, parent=photo).put()
 
     @session.login_required
+    @permission.bout_permission_required
     def post(self):
         user = session.get_user_from_session()
         if not user:
@@ -116,6 +118,7 @@ class AddCommentHandler(webapp2.RequestHandler):
         Comment(parent=bout, user=user, message=message, timestamp=datetime.datetime.now()).put()
 
     @session.login_required
+    @permission.bout_permission_required
     def post(self):
         user = session.get_user_from_session()
         if not user:
@@ -132,6 +135,7 @@ class AddCommentHandler(webapp2.RequestHandler):
 
 class GetCommentsHandler(webapp2.RequestHandler):
     @session.login_required
+    @permission.bout_permission_required
     def get(self):
         bout_id = long(self.request.get('bout_id'))
         bout = Bout.get_by_id(bout_id)
@@ -146,6 +150,7 @@ class GetCommentsHandler(webapp2.RequestHandler):
 
 class LeaderboardHandler(webapp2.RequestHandler):
     @session.login_required
+    @permission.bout_permission_required
     def get(self):
         response = []
         bout_id = long(self.request.get('bout_id'))
@@ -162,6 +167,7 @@ class LeaderboardHandler(webapp2.RequestHandler):
 
 class InviteHandler(webapp2.RequestHandler):
     @session.login_required
+    @permission.bout_permission_required
     def post(self):
         email = self.request.get('email')
         name = self.request.get('name')
@@ -176,9 +182,10 @@ class InviteHandler(webapp2.RequestHandler):
 
 
 class TestHandler(webapp2.RequestHandler):
+    @session.login_required
     @permission.bout_permission_required
     def get(self):
-        pass
+        self.response.write('... working')
 
 application = webapp2.WSGIApplication([ ('/bouts/create', CreateBoutHandler),
                                         ('/bouts/get', GetBoutsHandler),
