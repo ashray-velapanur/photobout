@@ -46,10 +46,10 @@ class AddPhotoHandler(blobstore_handlers.BlobstoreUploadHandler):
         user = session.get_user_from_session()
         email = user.email
         bout_id = long(self.request.get('bout_id'))
-        image_blob_key = str(self.get_uploads('image')[0].key())
+        image_blob_key = str(self.get_uploads()[0].key())
         bout = Bout.get_by_id(bout_id)
-        Photo.create(bout, email, image_blob_key)
-
+        photo = Photo.create(bout, email, image_blob_key)
+        
     @session.login_required
     def get(self):
         response = {'upload_url': blobstore.create_upload_url('/bouts/photos/add')}
