@@ -23,8 +23,6 @@ class CreateBoutHandler(webapp2.RequestHandler):
     @session.login_required
     def post(self):
         user = session.get_user_from_session()
-        if not user:
-            return
         name = self.request.get('name')
         period = self.request.get('period')
         permission = self.request.get('permission')
@@ -90,8 +88,6 @@ class GetBoutsHandler(webapp2.RequestHandler):
     @session.login_required
     def get(self):
         user = session.get_user_from_session()
-        if not user:
-            return
         email = user.email
         response = []
         for bout in Bout.all():
@@ -109,8 +105,6 @@ class PhotoVoteHandler(webapp2.RequestHandler):
     @permission.bout_permission_required
     def post(self):
         user = session.get_user_from_session()
-        if not user:
-            return
         email = user.key().name()
         owner_email = self.request.get('owner_email')
         bout_id = long(self.request.get('bout_id'))
@@ -126,8 +120,6 @@ class AddCommentHandler(webapp2.RequestHandler):
     @permission.bout_permission_required
     def post(self):
         user = session.get_user_from_session()
-        if not user:
-            return
         message = self.request.get('message')
         bout_id = long(self.request.get('bout_id'))
         bout = Bout.get_by_id(bout_id)
