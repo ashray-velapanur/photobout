@@ -68,13 +68,21 @@ class GetPhotoHandler(blobstore_handlers.BlobstoreDownloadHandler):
         self.send_blob(blob_info)
 
 class GetBoutsHandler(webapp2.RequestHandler):
+    def format_time_left(self, time_left):
+        seconds = int(time_left.total_seconds())
+        hours = seconds/(60*60) % 24
+        days = seconds/(60*60)/24
+        if days >= 1:
+            return "%s days, %s hours left"%(days, hours)
+        else:
+            return "%s hours left"%hours
+
     def get_dict(self, bout, email):
         bout_dict = {}
-        seconds_left = bout.time_left.seconds
         bout_dict['id'] = bout.id
         bout_dict['name'] = bout.name
         bout_dict['description'] = bout.description
-        bout_dict['time_left'] = "%s days, %s hours"%(seconds_left/(60*60*60), seconds_left/(60*60))
+        bout_dict['time_left'] = self.format_time_left(bout.time_left)
         bout_dict['num_comments'] = len(bout.comments)
         bout_dict['photos'] = []
         for photo in bout.photos:
