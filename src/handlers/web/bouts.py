@@ -72,6 +72,7 @@ class GetBoutsHandler(webapp2.RequestHandler):
         bout_dict = {}
         bout_dict['id'] = bout.id
         bout_dict['name'] = bout.name
+        bout_dict['description'] = bout.description
         bout_dict['time_left'] = str(bout.time_left)
         bout_dict['num_comments'] = len(bout.comments)
         bout_dict['photos'] = []
