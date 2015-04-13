@@ -26,9 +26,10 @@ class CreateBoutHandler(webapp2.RequestHandler):
         name = self.request.get('name')
         period = self.request.get('period')
         permission = self.request.get('permission')
+        description = self.request.get('description')
         if not permission:
             permission = Permission.PUBLIC
-        bout = Bout.create(user, name, period, permission)
+        bout = Bout.create(user, name, description, period, permission)
         response = {'id': bout.id}
         self.response.write(json.dumps(response))
 

@@ -11,13 +11,14 @@ Permission =  enum.make("Permission", ("PUBLIC", "PRIVATE"))
 
 class Bout(db.Model):
     name = db.StringProperty(indexed=False)
+    description = db.TextProperty(indexed=False)
     owner = db.ReferenceProperty(indexed=False)
     period = db.StringProperty(indexed=False)
     permission = EnumProperty(Permission)
 
     @classmethod
-    def create(cls, user, name, period, permission):
-        bout = Bout(owner=user, name=name, period=period, permission=int(permission))
+    def create(cls, user, name, description, period, permission):
+        bout = Bout(owner=user, name=name, description=description, period=period, permission=int(permission))
         bout.put()
         return bout
 
