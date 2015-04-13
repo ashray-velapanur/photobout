@@ -99,11 +99,16 @@ class GetBoutsHandler(webapp2.RequestHandler):
         else:
             status = None
         response = []
-        for bout in Bout.all().filter('status', status) if status else Bout.all():
-            if bout.permission == Permission.PRIVATE:
-                if bout.owner.email != user.email:
-                    continue
+                bout_id = self.request.get('bout_id')
+        if bout_id and len(bout_id) > 0:
+            bout = Bout.get_by_id(long(bout_id))
             response.append(self.get_dict(bout, email))
+        else:
+            for bout in Bout.all().filter('status', status) if status else Bout.all():
+                if bout.permission == Permission.PRIVATE:
+                    if bout.owner.email != user.email:
+                        continue
+                response.append(self.get_dict(bout, email))
         self.response.write(json.dumps(response))
 
 class PhotoVoteHandler(webapp2.RequestHandler):
