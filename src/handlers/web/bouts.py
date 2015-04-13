@@ -11,7 +11,7 @@ from google.appengine.ext.webapp import blobstore_handlers
 
 from model.user import User
 from model.third_party_user import ThirdPartyUser
-from model.bout import Bout, Permission
+from model.bout import Bout, Permission, BoutStatus
 from model.photo import Photo
 from model.vote import Vote
 from model.comment import Comment
@@ -92,8 +92,14 @@ class GetBoutsHandler(webapp2.RequestHandler):
     def get(self):
         user = session.get_user_from_session()
         email = user.email
+        if self.request.get('status') == 'current':
+            status = 1
+        elif self.request.get('status') == 'past':
+            status = 2
+        else:
+            status = None
         response = []
-        for bout in Bout.all():
+        for bout in Bout.all().filter('status', status) if status else Bout.all():
             if bout.permission == Permission.PRIVATE:
                 if bout.owner.email != user.email:
                     continue
