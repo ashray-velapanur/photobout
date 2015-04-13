@@ -99,7 +99,7 @@ class GetBoutsHandler(webapp2.RequestHandler):
         else:
             status = None
         response = []
-                bout_id = self.request.get('bout_id')
+        bout_id = self.request.get('bout_id')
         if bout_id and len(bout_id) > 0:
             bout = Bout.get_by_id(long(bout_id))
             response.append(self.get_dict(bout, email))
