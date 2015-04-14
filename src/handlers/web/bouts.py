@@ -68,21 +68,12 @@ class GetPhotoHandler(blobstore_handlers.BlobstoreDownloadHandler):
         self.send_blob(blob_info)
 
 class GetBoutsHandler(webapp2.RequestHandler):
-    def format_time_left(self, time_left):
-        seconds = int(time_left.total_seconds())
-        hours = seconds/(60*60) % 24
-        days = seconds/(60*60)/24
-        if days >= 1:
-            return "%s days, %s hours left"%(days, hours)
-        else:
-            return "%s hours left"%hours
-
     def get_dict(self, bout, email):
         bout_dict = {}
         bout_dict['id'] = bout.id
         bout_dict['name'] = bout.name
         bout_dict['description'] = bout.description
-        bout_dict['time_left'] = self.format_time_left(bout.time_left)
+        bout_dict['time_left'] = bout.time_left_string
         bout_dict['num_comments'] = len(bout.comments)
         bout_dict['photos'] = []
         for photo in bout.photos:
@@ -96,16 +87,18 @@ class GetBoutsHandler(webapp2.RequestHandler):
             bout_dict['photos'].append(photo_dict)
         return bout_dict
 
+    def get_status(self, status):
+        if status == 'current':
+            return 1
+        elif status == 'past':
+            return 2
+        return None
+
     @session.login_required
     def get(self):
         user = session.get_user_from_session()
         email = user.email
-        if self.request.get('status') == 'current':
-            status = 1
-        elif self.request.get('status') == 'past':
-            status = 2
-        else:
-            status = None
+        status = self.get_status(self.request.get('status'))
         response = []
         bout_id = self.request.get('bout_id')
         if bout_id and len(bout_id) > 0:

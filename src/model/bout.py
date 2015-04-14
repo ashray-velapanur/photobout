@@ -50,6 +50,15 @@ class Bout(db.Model):
     def time_left(self):
         return self.end_time - datetime.datetime.now()
 
+    @property
+    def time_left_string(self):
+        total_hours = int(self.time_left.total_seconds())/(3600)
+        hours = total_hours%24
+        days = total_hours/24
+        if days >= 1:
+            return "%s days, %s hours left"%(days, hours)
+        return "%s hours left"%hours
+
     def change_status(self):
         deferred.defer(change_status, self, _eta=self.end_time)
 
