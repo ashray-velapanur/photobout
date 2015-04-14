@@ -126,12 +126,12 @@ class GetBoutsHandler(webapp2.RequestHandler):
             bout = Bout.get_by_id(long(bout_id))
             response.append(self.get_dict(bout, email))
         else:
-            if status == 'open':
-                response = self._get_open_bouts(email)
-            elif status == 'current':
+            if status == 'current':
                 response = self._get_current_bouts(email)
             elif status == 'past':
                 response = self._get_past_bouts(email)
+            else:
+                response = self._get_open_bouts(email)
         self.response.write(json.dumps(response))
 
 class PhotoVoteHandler(webapp2.RequestHandler):
