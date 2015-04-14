@@ -87,29 +87,51 @@ class GetBoutsHandler(webapp2.RequestHandler):
             bout_dict['photos'].append(photo_dict)
         return bout_dict
 
-    def get_status(self, status):
-        if status == 'current':
-            return 1
-        elif status == 'past':
-            return 2
-        return None
+    def _get_open_bouts(self, email):
+        response = []
+        for bout in Bout.all().filter('status', 1):
+            if bout.permission == Permission.PRIVATE:
+                if bout.owner.email != user.email:
+                    continue
+            response.append(self.get_dict(bout, email))
+        return response
+
+    def _get_current_bouts(self, email):
+        response = []
+        for bout in Bout.all().filter('status', 1):
+            if bout.permission == Permission.PRIVATE:
+                if bout.owner.email != user.email:
+                    continue
+            if not Photo.get_by_key_name(email, parent=bout):
+                continue
+            response.append(self.get_dict(bout, email))
+        return response
+
+    def _get_past_bouts(self, email):
+        response = []
+        for bout in Bout.all().filter('status', 2):
+            if bout.permission == Permission.PRIVATE:
+                if bout.owner.email != user.email:
+                    continue
+            response.append(self.get_dict(bout, email))
+        return response
 
     @session.login_required
     def get(self):
         user = session.get_user_from_session()
         email = user.email
-        status = self.get_status(self.request.get('status'))
-        response = []
+        status = self.request.get('status')
         bout_id = self.request.get('bout_id')
         if bout_id and len(bout_id) > 0:
             bout = Bout.get_by_id(long(bout_id))
             response.append(self.get_dict(bout, email))
         else:
-            for bout in Bout.all().filter('status', status) if status else Bout.all():
-                if bout.permission == Permission.PRIVATE:
-                    if bout.owner.email != user.email:
-                        continue
-                response.append(self.get_dict(bout, email))
+            if status == 'open':
+                response = self._get_open_bouts(email)
+            elif status == 'current':
+                response = self._get_current_bouts(email)
+            elif status == 'past':
+                response = self._get_past_bouts(email)
         self.response.write(json.dumps(response))
 
 class PhotoVoteHandler(webapp2.RequestHandler):
@@ -157,6 +179,7 @@ class GetCommentsHandler(webapp2.RequestHandler):
             comment_dict['name'] = comment.user.name
             comment_dict['message'] = comment.message
             comment_dict['timestamp'] = comment.timestamp.strftime('%x %X')
+            comment_dict['facebook_id'] = ThirdPartyUser.get_by_key_name('FB', parent=comment.user).id
             response.append(comment_dict)
         self.response.write(json.dumps(response))
 
