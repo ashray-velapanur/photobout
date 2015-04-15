@@ -2,6 +2,10 @@ from google.appengine.ext import db
 
 class Vote(db.Model):
     @classmethod
+    def create(cls, email, photo):
+        cls(key_name=email, parent=photo).put()
+
+    @classmethod
     def for_(cls, photo):
         return cls.all().ancestor(photo).fetch(None)
 
