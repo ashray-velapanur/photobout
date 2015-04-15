@@ -1,6 +1,5 @@
 import logging
 
-from model.user import User
 from model.bout import Bout
 from model.photo import Photo
 from util import session

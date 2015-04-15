@@ -16,13 +16,13 @@ from model.photo import Photo
 from model.vote import Vote
 from model.comment import Comment
 from model.invited import Invited
-from util import session, permission
+from util import util
 from search_documents.user_document import create_user_search_document
 
 class CreateBoutHandler(webapp2.RequestHandler):
-    @session.login_required
+    @util.login_required
     def post(self):
-        user = session.get_user_from_session()
+        user = util.get_user_from_session()
         name = self.request.get('name')
         period = self.request.get('period')
         permission = self.request.get('permission')
@@ -30,6 +30,7 @@ class CreateBoutHandler(webapp2.RequestHandler):
         if not permission:
             permission = 1
         bout = Bout.create(user, name, description, period, permission)
+        util.schedule_end(bout)
         response = {'id': bout.id}
         self.response.write(json.dumps(response))
 
@@ -39,17 +40,17 @@ class CreateBoutHandler(webapp2.RequestHandler):
         self.response.out.write(template.render(path, template_values))
 
 class AddPhotoHandler(blobstore_handlers.BlobstoreUploadHandler):
-    @session.login_required
-    @permission.bout_permission_required
+    @util.login_required
+    @util.bout_permission_required
     def post(self):
-        user = session.get_user_from_session()
+        user = util.get_user_from_session()
         email = user.email
         bout_id = long(self.request.get('bout_id'))
         image_blob_key = str(self.get_uploads()[0].key())
         bout = Bout.get_by_id(bout_id)
         photo = Photo.create(bout, email, image_blob_key)
         
-    @session.login_required
+    @util.login_required
     def get(self):
         response = {'upload_url': blobstore.create_upload_url('/bouts/photos/add')}
         self.response.write(json.dumps(response))
@@ -61,7 +62,7 @@ class AddPhotoPageHandler(webapp2.RequestHandler):
         self.response.out.write(template.render(path, template_values))
 
 class GetPhotoHandler(blobstore_handlers.BlobstoreDownloadHandler):
-    @session.login_required
+    @util.login_required
     def get(self):
         blob_key = self.request.get('blob_key')
         blob_info = blobstore.BlobInfo.get(blob_key)
@@ -117,9 +118,9 @@ class GetBoutsHandler(webapp2.RequestHandler):
             response.append(self.get_dict(bout, email))
         return response
 
-    @session.login_required
+    @util.login_required
     def get(self):
-        user = session.get_user_from_session()
+        user = util.get_user_from_session()
         email = user.email
         status = self.request.get('status')
         bout_id = self.request.get('bout_id')
@@ -139,10 +140,10 @@ class PhotoVoteHandler(webapp2.RequestHandler):
     def create_vote(self, email, photo):
         Vote(key_name=email, parent=photo).put()
 
-    @session.login_required
-    @permission.bout_permission_required
+    @util.login_required
+    @util.bout_permission_required
     def get(self):
-        user = session.get_user_from_session()
+        user = util.get_user_from_session()
         email = user.key().name()
         owner_email = self.request.get('owner_email')
         bout_id = long(self.request.get('bout_id'))
@@ -154,10 +155,10 @@ class AddCommentHandler(webapp2.RequestHandler):
     def create_comment(self, user, bout, message):
         Comment(parent=bout, user=user, message=message, timestamp=datetime.datetime.now()).put()
 
-    @session.login_required
-    @permission.bout_permission_required
+    @util.login_required
+    @util.bout_permission_required
     def post(self):
-        user = session.get_user_from_session()
+        user = util.get_user_from_session()
         message = self.request.get('message')
         bout_id = long(self.request.get('bout_id'))
         bout = Bout.get_by_id(bout_id)
@@ -169,8 +170,8 @@ class AddCommentHandler(webapp2.RequestHandler):
         self.response.out.write(template.render(path, template_values))
 
 class GetCommentsHandler(webapp2.RequestHandler):
-    @session.login_required
-    @permission.bout_permission_required
+    @util.login_required
+    @util.bout_permission_required
     def get(self):
         bout_id = long(self.request.get('bout_id'))
         bout = Bout.get_by_id(bout_id)
@@ -185,8 +186,8 @@ class GetCommentsHandler(webapp2.RequestHandler):
         self.response.write(json.dumps(response))
 
 class LeaderboardHandler(webapp2.RequestHandler):
-    @session.login_required
-    @permission.bout_permission_required
+    @util.login_required
+    @util.bout_permission_required
     def get(self):
         response = []
         bout_id = long(self.request.get('bout_id'))
@@ -203,8 +204,8 @@ class LeaderboardHandler(webapp2.RequestHandler):
         self.response.write(json.dumps(response))
 
 class InviteHandler(webapp2.RequestHandler):
-    @session.login_required
-    @permission.bout_permission_required
+    @util.login_required
+    @util.bout_permission_required
     def post(self):
         email = self.request.get('email')
         name = self.request.get('name')
@@ -219,8 +220,8 @@ class InviteHandler(webapp2.RequestHandler):
 
 
 class TestHandler(webapp2.RequestHandler):
-    @session.login_required
-    @permission.bout_permission_required
+    @util.login_required
+    @util.bout_permission_required
     def get(self):
         self.response.write('... working')
 

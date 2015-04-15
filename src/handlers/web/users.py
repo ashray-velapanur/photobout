@@ -10,7 +10,7 @@ from google.appengine.ext.webapp import template
 from model.user import User
 from model.third_party_user import ThirdPartyUser
 from search_documents.user_document import create_user_search_document, fetch
-from util import session
+from util import util
 from config import PEPPER
 
 class SignupHandler(webapp2.RequestHandler):
@@ -72,7 +72,7 @@ class LoginHandler(webapp2.RequestHandler):
         self.response.write(json.dumps(response))
 
 class CheckSessionHandler(webapp2.RequestHandler):
-    @session.login_required
+    @util.login_required
     def get(self):
         session = get_current_session()
         self.response.write(session['email'] if session.has_key('email') else 'no key')
@@ -80,12 +80,12 @@ class CheckSessionHandler(webapp2.RequestHandler):
 class ListUsersHandler(webapp2.RequestHandler):
     def post(self):
         email = self.request.get('email')
-        session.set_session(email)
+        util.set_session(email)
 
     def get(self):
         users = User.all().fetch(None)
         emails = [user.email for user in User.all()]
-        current_user = session.get_user_from_session()
+        current_user = util.get_user_from_session()
         template_values = {'emails': emails, 'current_user': current_user.email if current_user else None}
         path = 'templates/list_users.html'
         self.response.out.write(template.render(path, template_values))
