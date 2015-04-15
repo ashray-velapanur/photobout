@@ -39,3 +39,7 @@ class Bout(db.Model):
         if days >= 1:
             return "%s days, %s hours left"%(days, hours)
         return "%s hours left"%hours
+
+    def change_status(self, status):
+        self.status = status
+        self.put()

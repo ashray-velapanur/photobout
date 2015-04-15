@@ -15,6 +15,7 @@ def schedule_end(bout):
 def set_winner(bout):
     winner = User.get_by_key_name(sorted(Photo.for_(bout), key=lambda x: len(Vote.for_(x)), reverse=True)[0].owner_email)
     Winner.create(winner, bout)
+    bout.change_status(2)
 
 def _user_has_permission(handler):
 	bout_id = long(handler.request.get('bout_id'))
