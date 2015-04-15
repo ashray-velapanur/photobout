@@ -55,6 +55,7 @@ class AddPhotoHandler(blobstore_handlers.BlobstoreUploadHandler):
         self.response.write(json.dumps(response))
 
 class AddPhotoPageHandler(webapp2.RequestHandler):
+    @util.login_required
     def get(self):
         template_values = {'upload_url': blobstore.create_upload_url('/bouts/photos/add')}
         path = 'templates/add_photo.html'
@@ -155,7 +156,7 @@ class GetCommentsHandler(webapp2.RequestHandler):
         bout_id = long(self.request.get('bout_id'))
         bout = Bout.get_by_id(bout_id)
         response = []
-        for comment in bout.comments:
+        for comment in Comment.for_(bout):
             comment_dict = {}
             comment_dict['name'] = comment.user.name
             comment_dict['message'] = comment.message
