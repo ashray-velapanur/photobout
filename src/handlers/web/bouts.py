@@ -141,7 +141,7 @@ class PhotoVoteHandler(webapp2.RequestHandler):
 
     @session.login_required
     @permission.bout_permission_required
-    def post(self):
+    def get(self):
         user = session.get_user_from_session()
         email = user.key().name()
         owner_email = self.request.get('owner_email')
@@ -191,10 +191,10 @@ class LeaderboardHandler(webapp2.RequestHandler):
         response = []
         bout_id = long(self.request.get('bout_id'))
         bout = Bout.get_by_id(bout_id)
-        for rank, photo in enumerate(sorted(bout.photos, key=lambda x: len(x.votes), reverse=True), start=1):
+        for rank, photo in enumerate(sorted(Photo.for_(bout), key=lambda x: len(Vote.for_(x)), reverse=True), start=1):
             user_dict = {}
             owner = User.get_by_key_name(photo.owner_email)
-            user_dict['votes'] = len(photo.votes)
+            user_dict['votes'] = len(Vote.for_(photo))
             user_dict['rank'] = rank
             user_dict['email'] = photo.owner_email
             user_dict['name'] = owner.name
