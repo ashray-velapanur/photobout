@@ -106,13 +106,6 @@ class LogoutHandler(webapp2.RequestHandler):
         session.terminate()
 
 class UsersBoutsHandler(webapp2.RequestHandler):
-    def get_dict(self, bout):
-        bout_dict = {}
-        bout_dict['name'] = bout.name
-        bout_dict['id'] = bout.id
-        bout_dict['description'] = bout.description
-        return bout_dict
-
     @util.login_required
     def get(self):
         user = util.get_user_from_session()
@@ -120,13 +113,6 @@ class UsersBoutsHandler(webapp2.RequestHandler):
         self.response.write(json.dumps(response))
 
 class UsersWinsHandler(webapp2.RequestHandler):
-    def get_dict(self, bout):
-        bout_dict = {}
-        bout_dict['name'] = bout.name
-        bout_dict['id'] = bout.id
-        bout_dict['description'] = bout.description
-        return bout_dict
-
     @util.login_required
     def get(self):
         user = util.get_user_from_session()
