@@ -74,16 +74,17 @@ class GetBoutsHandler(webapp2.RequestHandler):
         bout_dict['name'] = bout.name
         bout_dict['description'] = bout.description
         bout_dict['time_left'] = bout.time_left_string
-        bout_dict['num_comments'] = len(bout.comments)
+        bout_dict['num_comments'] = len(Comment.for_(bout))
         bout_dict['photos'] = []
-        for photo in bout.photos:
+        for photo in Photo.for_(bout):
             photo_dict = {}
+            owner = User.get_by_key_name(photo.owner_email)
             photo_dict['image'] = photo.image_url
-            photo_dict['owner_email'] = photo.owner.email
-            photo_dict['owner_name'] = photo.owner.name
-            photo_dict['num_votes'] = len(photo.votes)
-            photo_dict['is_voted'] = photo.is_voted(email)
-            photo_dict['facebook_id'] = ThirdPartyUser.get_by_key_name('FB', parent=photo.owner).id
+            photo_dict['owner_email'] = photo.owner_email
+            photo_dict['owner_name'] = owner.name
+            photo_dict['num_votes'] = len(Vote.for_(photo))
+            photo_dict['is_voted'] = Vote.is_voted(email, photo)
+            photo_dict['facebook_id'] = ThirdPartyUser.get_by_key_name('FB', parent=owner).id
             bout_dict['photos'].append(photo_dict)
         return bout_dict
 
@@ -192,11 +193,12 @@ class LeaderboardHandler(webapp2.RequestHandler):
         bout = Bout.get_by_id(bout_id)
         for rank, photo in enumerate(sorted(bout.photos, key=lambda x: len(x.votes), reverse=True), start=1):
             user_dict = {}
+            owner = User.get_by_key_name(photo.owner_email)
             user_dict['votes'] = len(photo.votes)
             user_dict['rank'] = rank
             user_dict['email'] = photo.owner_email
-            user_dict['name'] = photo.owner.name
-            user_dict['facebook_id'] = ThirdPartyUser.get_by_key_name('FB', parent=photo.owner).id
+            user_dict['name'] = owner.name
+            user_dict['facebook_id'] = ThirdPartyUser.get_by_key_name('FB', parent=owner).id
             response.append(user_dict)
         self.response.write(json.dumps(response))
 
