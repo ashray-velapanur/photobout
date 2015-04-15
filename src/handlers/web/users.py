@@ -116,7 +116,7 @@ class UsersBoutsHandler(webapp2.RequestHandler):
     @util.login_required
     def get(self):
         user = util.get_user_from_session()
-        response = [self.get_dict(photo.bout) for photo in Photo.for_user_(user)]
+        response = [util.make_bout_dict(photo.bout, user.email) for photo in Photo.for_user_(user)]
         self.response.write(json.dumps(response))
 
 class UsersWinsHandler(webapp2.RequestHandler):
@@ -130,7 +130,7 @@ class UsersWinsHandler(webapp2.RequestHandler):
     @util.login_required
     def get(self):
         user = util.get_user_from_session()
-        response = [self.get_dict(win.bout) for win in Winner.for_(user)]
+        response = [util.make_bout_dict(win.bout, user.email) for win in Winner.for_(user)]
         self.response.write(json.dumps(response))
 
 application = webapp2.WSGIApplication([ ('/users/signup', SignupHandler),

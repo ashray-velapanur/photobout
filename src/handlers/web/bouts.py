@@ -68,33 +68,13 @@ class GetPhotoHandler(blobstore_handlers.BlobstoreDownloadHandler):
         self.send_blob(blob_info)
 
 class GetBoutsHandler(webapp2.RequestHandler):
-    def get_dict(self, bout, email):
-        bout_dict = {}
-        bout_dict['id'] = bout.id
-        bout_dict['name'] = bout.name
-        bout_dict['description'] = bout.description
-        bout_dict['time_left'] = bout.time_left_string
-        bout_dict['num_comments'] = len(Comment.for_(bout))
-        bout_dict['photos'] = []
-        for photo in Photo.for_(bout):
-            photo_dict = {}
-            owner = User.get_by_key_name(photo.owner_email)
-            photo_dict['image'] = photo.image_url
-            photo_dict['owner_email'] = photo.owner_email
-            photo_dict['owner_name'] = owner.name
-            photo_dict['num_votes'] = len(Vote.for_(photo))
-            photo_dict['is_voted'] = Vote.is_voted(email, photo)
-            photo_dict['facebook_id'] = ThirdPartyUser.get_by_key_name('FB', parent=owner).id
-            bout_dict['photos'].append(photo_dict)
-        return bout_dict
-
     def _get_open_bouts(self, email):
         response = []
         for bout in Bout.all().filter('status', 1):
             if bout.permission == 2:
                 if bout.owner.email != user.email:
                     continue
-            response.append(self.get_dict(bout, email))
+            response.append(util.make_bout_dict(bout, email))
         return response
 
     def _get_current_bouts(self, email):
@@ -105,7 +85,7 @@ class GetBoutsHandler(webapp2.RequestHandler):
                     continue
             if not Photo.get_by_key_name(email, parent=bout):
                 continue
-            response.append(self.get_dict(bout, email))
+            response.append(util.make_bout_dict(bout, email))
         return response
 
     def _get_past_bouts(self, email):
@@ -114,7 +94,7 @@ class GetBoutsHandler(webapp2.RequestHandler):
             if bout.permission == 2:
                 if bout.owner.email != user.email:
                     continue
-            response.append(self.get_dict(bout, email))
+            response.append(util.make_bout_dict(bout, email))
         return response
 
     @util.login_required
@@ -125,7 +105,7 @@ class GetBoutsHandler(webapp2.RequestHandler):
         bout_id = self.request.get('bout_id')
         if bout_id and len(bout_id) > 0:
             bout = Bout.get_by_id(long(bout_id))
-            response = self.get_dict(bout, email)
+            response = util.make_bout_dict(bout, email)
         else:
             if status == 'current':
                 response = self._get_current_bouts(email)
