@@ -1,3 +1,4 @@
+import logging
 import webapp2
 import json
 from webapp2_extras.security import generate_password_hash, check_password_hash
@@ -8,6 +9,8 @@ from google.appengine.api import urlfetch, search
 from google.appengine.ext.webapp import template
 
 from model.user import User
+from model.photo import Photo
+from model.winner import Winner
 from model.third_party_user import ThirdPartyUser
 from search_documents.user_document import create_user_search_document, fetch
 from util import util
@@ -97,14 +100,44 @@ class UsersSearchHandler(webapp2.RequestHandler):
         self.response.write(json.dumps({'users': [{'name':user.name,'email':user.doc_id} for user in user_docs.results]}))
 
 class LogoutHandler(webapp2.RequestHandler):
-    @session.login_required
+    @util.login_required
     def post(self):
         session = get_current_session()
         session.terminate()
-   
+
+class UsersBoutsHandler(webapp2.RequestHandler):
+    def get_dict(self, bout):
+        bout_dict = {}
+        bout_dict['name'] = bout.name
+        bout_dict['id'] = bout.id
+        bout_dict['description'] = bout.description
+        return bout_dict
+
+    @util.login_required
+    def get(self):
+        user = util.get_user_from_session()
+        response = [self.get_dict(photo.bout) for photo in Photo.for_user_(user)]
+        self.response.write(json.dumps(response))
+
+class UsersWinsHandler(webapp2.RequestHandler):
+    def get_dict(self, bout):
+        bout_dict = {}
+        bout_dict['name'] = bout.name
+        bout_dict['id'] = bout.id
+        bout_dict['description'] = bout.description
+        return bout_dict
+
+    @util.login_required
+    def get(self):
+        user = util.get_user_from_session()
+        response = [self.get_dict(win.bout) for win in Winner.for_(user)]
+        self.response.write(json.dumps(response))
+
 application = webapp2.WSGIApplication([ ('/users/signup', SignupHandler),
                                         ('/users/logout', LogoutHandler),
                                         ('/users/list', ListUsersHandler),
+                                        ('/users/bouts', UsersBoutsHandler),
+                                        ('/users/wins', UsersWinsHandler),
                                         ('/users/([^/]+)/login', LoginHandler),
                                         ('/users/checksession', CheckSessionHandler),
                                         ('/users/search', UsersSearchHandler)], debug=True)
