@@ -122,7 +122,7 @@ class PhotoVoteHandler(webapp2.RequestHandler):
 
     @util.login_required
     @util.bout_permission_required
-    def get(self):
+    def post(self):
         user = util.get_user_from_session()
         email = user.key().name()
         owner_email = self.request.get('owner_email')
