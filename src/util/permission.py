@@ -1,7 +1,7 @@
 import logging
 
 from model.user import User
-from model.bout import Bout, Permission
+from model.bout import Bout
 from model.photo import Photo
 from util import session
 
@@ -11,7 +11,7 @@ def _user_has_permission(handler):
 	if not bout:
 		logging.info('... invalid bout id')
 		return False
-	if bout.permission == Permission.PUBLIC:
+	if bout.permission == 1:
 		logging.info('... public bout')
 		return True
 	user = session.get_user_from_session()

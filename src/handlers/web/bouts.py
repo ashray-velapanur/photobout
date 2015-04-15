@@ -11,7 +11,7 @@ from google.appengine.ext.webapp import blobstore_handlers
 
 from model.user import User
 from model.third_party_user import ThirdPartyUser
-from model.bout import Bout, Permission, BoutStatus
+from model.bout import Bout
 from model.photo import Photo
 from model.vote import Vote
 from model.comment import Comment
@@ -28,7 +28,7 @@ class CreateBoutHandler(webapp2.RequestHandler):
         permission = self.request.get('permission')
         description = self.request.get('description')
         if not permission:
-            permission = Permission.PUBLIC
+            permission = 1
         bout = Bout.create(user, name, description, period, permission)
         response = {'id': bout.id}
         self.response.write(json.dumps(response))
@@ -91,7 +91,7 @@ class GetBoutsHandler(webapp2.RequestHandler):
     def _get_open_bouts(self, email):
         response = []
         for bout in Bout.all().filter('status', 1):
-            if bout.permission == Permission.PRIVATE:
+            if bout.permission == 2:
                 if bout.owner.email != user.email:
                     continue
             response.append(self.get_dict(bout, email))
@@ -100,7 +100,7 @@ class GetBoutsHandler(webapp2.RequestHandler):
     def _get_current_bouts(self, email):
         response = []
         for bout in Bout.all().filter('status', 1):
-            if bout.permission == Permission.PRIVATE:
+            if bout.permission == 2:
                 if bout.owner.email != user.email:
                     continue
             if not Photo.get_by_key_name(email, parent=bout):
@@ -111,7 +111,7 @@ class GetBoutsHandler(webapp2.RequestHandler):
     def _get_past_bouts(self, email):
         response = []
         for bout in Bout.all().filter('status', 2):
-            if bout.permission == Permission.PRIVATE:
+            if bout.permission == 2:
                 if bout.owner.email != user.email:
                     continue
             response.append(self.get_dict(bout, email))
