@@ -5,7 +5,7 @@ class SearchDocument(object):
         self.index = search.Index(name=index_name)
 
     def make_document(self, id, fields):
-        document = search.Document(doc_id=id, fields=fields)
+        document = search.Document(doc_id=str(id), fields=fields)
         self.index.put(document)
 
     def make_fields(self, kwargs):
@@ -13,7 +13,6 @@ class SearchDocument(object):
         for name, value in kwargs.iteritems():
             if name in self.fields:
                 fields.append(self.fields[name](name=name, value=value))
-            fields.append()
         return fields
 
     def create(self, id, **kwargs):

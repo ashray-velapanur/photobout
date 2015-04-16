@@ -4,6 +4,8 @@ import logging
 
 from google.appengine.ext import db, deferred
 
+from search_documents.search_documents import BoutDocument
+
 class Bout(db.Model):
     name = db.StringProperty(indexed=False)
     description = db.TextProperty(indexed=False)
@@ -17,6 +19,7 @@ class Bout(db.Model):
     def create(cls, user, name, description, period, permission):
         bout = Bout(owner=user, name=name, description=description, period=int(period), permission=int(permission), created_at=datetime.datetime.now(), status=1)
         bout.put()
+        BoutDocument().create(bout.id, name=name, description=description)
         return bout
 
     @property
