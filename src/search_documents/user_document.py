@@ -162,5 +162,9 @@ class UserDocument(object):
         return self._value(NAME)
 
     @property
+    def facebook_id(self):
+        return self._value(FACEBOOK_ID)
+
+    @property
     def suggestions(self):
         return self._value(SUGGESTIONS)
