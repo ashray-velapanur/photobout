@@ -7,8 +7,8 @@ from model.third_party_user import ThirdPartyUser
 
 INDEX = 'user_search_index'
 LIST_DELIMITER =  " , "
-FIELDS = (NAME, SUGGESTIONS) =['name', 'suggestions']
-INDICES =  {NAME: 0, SUGGESTIONS: 1}
+FIELDS = (NAME, SUGGESTIONS, FACEBOOK_ID) =['name', 'suggestions', 'facebook_id']
+INDICES =  {NAME: 0, SUGGESTIONS: 1, FACEBOOK_ID: 2}
 
 
 def index():
@@ -67,11 +67,12 @@ def _get_third_party_names(user):
 
 def create_user_search_document(user, save = True):
     other_names = _get_third_party_names(user)
-    return _create(user.email, user.name, other_names, should_save = save)
+    facebook_id = ThirdPartyUser.for_(user, 'FB').id
+    return _create(user.email, user.name, facebook_id, other_names, should_save = save)
 
-def _create(doc_id, name = None, other_names = None, suggestions = None, should_save = True):
+def _create(doc_id, name = None, facebook_id = None, other_names = None, suggestions = None, should_save = True):
     suggestions = suggestions or build_suggestions(name,*(other_names or []))
-    fields = [search.TextField(name=NAME, value=name), search.TextField(name=SUGGESTIONS, value=suggestions)]
+    fields = [search.TextField(name=NAME, value=name), search.TextField(name=FACEBOOK_ID, value=facebook_id), search.TextField(name=SUGGESTIONS, value=suggestions)]
 
     document = search.Document(
         doc_id = str(doc_id),
