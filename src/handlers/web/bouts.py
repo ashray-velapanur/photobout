@@ -105,9 +105,10 @@ class GetBoutsHandler(webapp2.RequestHandler):
         email = user.email
         status = self.request.get('status')
         bout_id = self.request.get('bout_id')
+        response = []
         if bout_id and len(bout_id) > 0:
             bout = Bout.get_by_id(long(bout_id))
-            response = util.make_bout_dict(bout, email)
+            response.append(util.make_bout_dict(bout, email))
         else:
             if status == 'current':
                 response = self._get_current_bouts(email)
