@@ -94,10 +94,10 @@ class ListUsersHandler(webapp2.RequestHandler):
         self.response.out.write(template.render(path, template_values))
 
 class UsersSearchHandler(webapp2.RequestHandler):
-    def post(self):
+    def get(self):
         search_string = self.request.get('search_string')
         user_docs = fetch('(suggestions:"%s" OR name:"%s")' % (search_string, search_string), None, limit=100, sort_options=search.SortOptions(expressions=[search.SortExpression(expression='name', direction=search.SortExpression.ASCENDING)]))
-        self.response.write(json.dumps({'users': [{'name':user.name,'email':user.doc_id} for user in user_docs.results]}))
+        self.response.write(json.dumps({'users': [{'name':user.name, 'email':user.doc_id, 'facebook_id': user.facebook_id} for user in user_docs.results]}))
 
 class LogoutHandler(webapp2.RequestHandler):
     @util.login_required

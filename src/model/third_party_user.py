@@ -7,3 +7,7 @@ class ThirdPartyUser(db.Model):
     @staticmethod
     def for_user(user):
         return ThirdPartyUser.all().ancestor(user)
+
+    @classmethod
+    def for_(cls, user, network):
+    	return cls.get_by_key_name('FB', parent=user)
