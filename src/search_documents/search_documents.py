@@ -8,17 +8,34 @@ class SearchDocument(object):
         document = search.Document(doc_id=str(id), fields=fields)
         self.index.put(document)
 
-    def make_fields(self, kwargs):
+    def make_fields(self, kwargs, build_suggestions):
         fields = []
         for name, value in kwargs.iteritems():
             if name in self.fields:
                 fields.append(self.fields[name](name=name, value=value))
+        if build_suggestions:
+            if kwargs.get('name'):
+                fields.append(search.TextField(name='suggestions', value=self.build_suggestions(kwargs.get('name'))))
         return fields
 
-    def create(self, id, **kwargs):
-        self.make_document(id, self.make_fields(kwargs))
+    def create(self, id, build_suggestions=True, **kwargs):
+        self.make_document(id, self.make_fields(kwargs, build_suggestions))
 
-    def search(self, string):
+    def build_suggestions(self, *strings):
+        a=set()
+        for string in strings:
+            if not string:
+                continue
+            j=1
+            while True:
+                for i in range(len(string)-j+1):
+                    a.add(string[i:i+j])
+                if j==len(string):
+                    break
+                j+=1
+        return ' '.join(a)
+
+    def fetch(self, string):
         results = self.index.search(string).results
         response = []
         for result in results:

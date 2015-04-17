@@ -19,7 +19,7 @@ class Bout(db.Model):
     def create(cls, user, name, description, period, permission):
         bout = Bout(owner=user, name=name, description=description, period=int(period), permission=int(permission), created_at=datetime.datetime.now(), status=1)
         bout.put()
-        BoutDocument().create(bout.id, name=name, description=description)
+        BoutDocument().create(bout.id, name=name, description=description, suggestions=name)
         return bout
 
     @property
