@@ -207,9 +207,17 @@ class TestHandler(webapp2.RequestHandler):
     def get(self):
         self.response.write('... working')
 
+class BoutSearchHandler(webapp2.RequestHandler):
+    @util.login_required
+    def get(self):
+        name = self.request.get('name')
+        response = BoutDocument().fetch(name)
+        self.response.write(json.dumps(response))
+
 application = webapp2.WSGIApplication([ ('/bouts/create', CreateBoutHandler),
                                         ('/bouts/get', GetBoutsHandler),
                                         ('/bouts/test', TestHandler),
+                                        ('/bouts/search', BoutSearchHandler),
                                         ('/bouts/leaderboard', LeaderboardHandler),
                                         ('/bouts/photos/add', AddPhotoHandler),
                                         ('/bouts/photos/add_page', AddPhotoPageHandler),
