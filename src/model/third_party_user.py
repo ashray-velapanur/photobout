@@ -10,4 +10,4 @@ class ThirdPartyUser(db.Model):
 
     @classmethod
     def for_(cls, user, network):
-    	return cls.get_by_key_name(network, user)
+    	return cls.get_by_key_name(network, parent=user)
