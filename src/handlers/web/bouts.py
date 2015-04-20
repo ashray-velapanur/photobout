@@ -210,8 +210,17 @@ class TestHandler(webapp2.RequestHandler):
 class BoutSearchHandler(webapp2.RequestHandler):
     @util.login_required
     def get(self):
+        response = []
         name = self.request.get('name')
-        response = BoutDocument().fetch(name)
+        results = BoutDocument().fetch(name)
+        if len(results) > 0:
+            user = util.get_user_from_session()
+            email = user.email
+            for result in results:
+                bout_id = str(result['id'])
+                if bout_id and len(bout_id) > 0:
+                    bout = Bout.get_by_id(long(bout_id))
+                    response.append(util.make_bout_dict(bout, email))
         self.response.write(json.dumps(response))
 
 application = webapp2.WSGIApplication([ ('/bouts/create', CreateBoutHandler),
