@@ -185,7 +185,7 @@ class LeaderboardHandler(webapp2.RequestHandler):
             response.append(user_dict)
         self.response.write(json.dumps(response))
 
-class InviteHandler(webapp2.RequestHandler):
+class AddInviteHandler(webapp2.RequestHandler):
     @util.login_required
     @util.bout_permission_required
     def post(self):
@@ -197,9 +197,35 @@ class InviteHandler(webapp2.RequestHandler):
             user = User(key_name=email, name=name)
             user.put()
             create_user_search_document(user)
-        Invited(key_name=bout_id, parent=user).put()
+        Invited(key_name=bout_id, parent=user, timestamp=datetime.datetime.now()).put()
         self.response.write(json.dumps('Invited '+email))
 
+class GetInvitesHandler(webapp2.RequestHandler):
+    @util.login_required
+    @util.bout_permission_required
+    def get(self):
+        user = util.get_user_from_session()
+        email = user.email
+        response = []
+        for invite in Invited.for_(user):
+            invite_dict = {}
+            bout_id = invite.key()
+            bout = Bout.get_by_id(bout_id)
+            invite_dict['bout'] = util.make_bout_dict(bout, email)
+            invite_dict['timestamp'] = invite.timestamp.strftime('%x %X')
+            invite_dict['facebook_id'] = ThirdPartyUser.get_by_key_name('FB', parent=user).id
+            response.append(invite_dict)
+        self.response.write(json.dumps(response))
+
+class DeleteInviteHandler(webapp2.RequestHandler):
+    @util.login_required
+    @util.bout_permission_required
+    def post(self):
+        user = util.get_user_from_session()
+        bout_id = self.request.get('bout_id')
+        invite = Invited.get_by_key_name (bout_id, parent=user)
+        if invite:
+            invite.delete()
 
 class TestHandler(webapp2.RequestHandler):
     @util.login_required
@@ -234,4 +260,6 @@ application = webapp2.WSGIApplication([ ('/bouts/create', CreateBoutHandler),
                                         ('/bouts/photos/vote', PhotoVoteHandler),
                                         ('/bouts/comments/add', AddCommentHandler),
                                         ('/bouts/comments/get', GetCommentsHandler),
-                                        ('/bouts/invite', InviteHandler)], debug=True)
+                                        ('/bouts/invites/add', AddInviteHandler),
+                                        ('/bouts/invites/get', GetInvitesHandler),
+                                        ('/bouts/invites/delete', DeleteInviteHandler)], debug=True)

@@ -1,4 +1,8 @@
 from google.appengine.ext import db
 
 class Invited(db.Model):
-    pass
+    timestamp = db.DateTimeProperty(indexed=False)
+
+    @classmethod
+    def for_(cls, user):
+        return cls.all().ancestor(user).fetch(None)
