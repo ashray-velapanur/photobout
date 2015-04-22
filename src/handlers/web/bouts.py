@@ -189,16 +189,18 @@ class AddInviteHandler(webapp2.RequestHandler):
     @util.login_required
     @util.bout_permission_required
     def post(self):
-        email = self.request.get('email')
-        name = self.request.get('name')
+        emails = self.request.get('emails')
+        #name = self.request.get('name')
         bout_id = self.request.get('bout_id')
-        user = User.get_by_key_name(email)
-        if not user:
-            user = User(key_name=email, name=name)
-            user.put()
-            create_user_search_document(user)
-        Invited(key_name=bout_id, parent=user, timestamp=datetime.datetime.now()).put()
-        self.response.write(json.dumps('Invited '+email))
+        invited_by = util.get_user_from_session()
+        for email in emails:
+            user = User.get_by_key_name(email)
+            #if not user:
+            #    user = User(key_name=email, name=name)
+            #    user.put()
+            #    create_user_search_document(user)
+            Invited(key_name=bout_id, parent=user, timestamp=datetime.datetime.now(), invited_by=invited_by).put()
+        self.response.write(json.dumps('Invitations sent'))
 
 class GetInvitesHandler(webapp2.RequestHandler):
     @util.login_required
@@ -213,7 +215,7 @@ class GetInvitesHandler(webapp2.RequestHandler):
             bout = Bout.get_by_id(bout_id)
             invite_dict['bout'] = util.make_bout_dict(bout, email)
             invite_dict['timestamp'] = invite.timestamp.strftime('%x %X')
-            invite_dict['facebook_id'] = ThirdPartyUser.get_by_key_name('FB', parent=user).id
+            invite_dict['facebook_id'] = ThirdPartyUser.get_by_key_name('FB', parent=invite.invited_by).id
             response.append(invite_dict)
         self.response.write(json.dumps(response))
 
