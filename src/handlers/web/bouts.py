@@ -189,19 +189,22 @@ class AddInviteHandler(webapp2.RequestHandler):
     @util.login_required
     @util.bout_permission_required
     def post(self):
-        ids = self.request.get('ids')
+        ids_str = self.request.get('ids')
+        logging.info('Ids string: '+ids_str)
+        ids = ids_str.split(';')
         #name = self.request.get('name')
         bout_id = self.request.get('bout_id')
         invited_by = util.get_user_from_session()
         for id in ids:
-            tpu = ThirdPartyUser.for_network_id(id)
-            if tpu:
-                user = tpu.parent()
-                #if not user:
-                #    user = User(key_name=email, name=name)
-                #    user.put()
-                #    create_user_search_document(user)
-                Invited(key_name=bout_id, parent=user, timestamp=datetime.datetime.now(), invited_by=invited_by).put()
+            if id:
+                tpu = ThirdPartyUser.for_network_id(id)
+                if tpu:
+                    user = tpu.parent()
+                    #if not user:
+                    #    user = User(key_name=email, name=name)
+                    #    user.put()
+                    #    create_user_search_document(user)
+                    Invited(key_name=bout_id, parent=user, timestamp=datetime.datetime.now(), invited_by=invited_by).put()
         self.response.write(json.dumps('Invitations sent'))
 
 class GetInvitesHandler(webapp2.RequestHandler):
