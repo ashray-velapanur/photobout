@@ -62,7 +62,7 @@ class LoginHandler(webapp2.RequestHandler):
             user = User(key_name=email, name=name)
             user.put()
             create_user_search_document(user)
-        ThirdPartyUser(key_name='FB', parent=user, access_token=access_token, id=user_id).put()
+        ThirdPartyUser(key_name='FB', parent=user, access_token=access_token, network_id=user_id).put()
         self.set_session(email)
         response['email'] = email
         return response

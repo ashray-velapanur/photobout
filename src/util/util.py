@@ -27,7 +27,7 @@ def make_bout_dict(bout, email):
         photo_dict['owner_name'] = owner.name
         photo_dict['num_votes'] = len(Vote.for_(photo))
         photo_dict['is_voted'] = Vote.is_voted(email, photo)
-        photo_dict['facebook_id'] = ThirdPartyUser.get_by_key_name('FB', parent=owner).id
+        photo_dict['facebook_id'] = ThirdPartyUser.get_by_key_name('FB', parent=owner).network_id
         bout_dict['photos'].append(photo_dict)
     return bout_dict
 
