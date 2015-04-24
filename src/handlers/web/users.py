@@ -118,24 +118,31 @@ class UsersWinsHandler(webapp2.RequestHandler):
     @util.login_required
     def get(self):
         user = util.get_user_from_session()
-        response = [util.make_bout_dict(win.bout, user.email) for win in Winner.for_(user)]
+        response = [util.make_bout_dict(win.bout, user.email) for win in Winner.for_user(user)]
         self.response.write(json.dumps(response))
 
 class NotificationsHandler(webapp2.RequestHandler):
     @util.login_required
     def get(self):
         user = util.get_user_from_session()
+        facebook_id = ThirdPartyUser.for_(user, 'FB').network_id
         notifications = Notification.for_(user)
         response = []
         for notification in notifications:
+            notification_type = notification.notification_type
+            bout = notification.bout
             notification_dict = {}
-            if notification.notification_type == 'invited':
-                notification_dict['bout'] = util.make_bout_dict(notification.bout, user.email)
-                notification_dict['timestamp'] = notification.timestamp.strftime('%x %X')
-                notification_dict['facebook_id'] = ThirdPartyUser.for_(user, 'FB').network_id
-                notification_dict['type'] = notification.notification_type
-                notification_dict['invited_by'] = Invited.for_(user, notification.bout).invited_by.name
-                response.append(notification_dict)
+            notification_dict['data'] = {}
+            notification_dict['type'] = notification_type
+            notification_dict['timestamp'] = notification.timestamp.strftime('%x %X')
+            notification_dict['facebook_id'] = facebook_id
+            if notification_type == 'invited':
+                notification_dict['data']['bout'] = util.make_bout_dict(bout, user.email)
+                notification_dict['data']['invited_by'] = Invited.for_(user, bout).invited_by.name
+            elif notification_type == 'winner':
+                notification_dict['data']['bout'] = util.make_bout_dict(bout, user.email)
+                notification_dict['data']['winner'] = Winner.for_(user, bout).user.name
+            response.append(notification_dict)
         self.response.write(json.dumps(response))
 
 application = webapp2.WSGIApplication([ ('/users/signup', SignupHandler),

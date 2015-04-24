@@ -9,6 +9,7 @@ from model.user import User
 from model.winner import Winner
 from model.bout import Bout
 from model.comment import Comment
+from model.notification import Notification
 from model.third_party_user import ThirdPartyUser
 
 def make_bout_dict(bout, email):
@@ -37,6 +38,7 @@ def schedule_end(bout):
 def set_winner(bout):
     winner = User.get_by_key_name(sorted(Photo.for_(bout), key=lambda x: len(Vote.for_(x)), reverse=True)[0].owner_email)
     Winner.create(winner, bout)
+    Notification.create('winner', winner, bout)
     bout.change_status(2)
 
 def _user_has_permission(handler):
