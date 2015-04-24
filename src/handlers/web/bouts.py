@@ -216,11 +216,13 @@ class GetInvitesHandler(webapp2.RequestHandler):
         response = []
         for invite in Invited.for_(user):
             invite_dict = {}
-            bout_id = invite.key()
+            bout_id = long(invite.key().name())
+            logging.info(bout_id)
             bout = Bout.get_by_id(bout_id)
             invite_dict['bout'] = util.make_bout_dict(bout, email)
             invite_dict['timestamp'] = invite.timestamp.strftime('%x %X')
             invite_dict['facebook_id'] = ThirdPartyUser.get_by_key_name('FB', parent=invite.invited_by).network_id
+            invite_dict['invited_by_name'] = invite.invited_by.name
             response.append(invite_dict)
         self.response.write(json.dumps(response))
 
@@ -230,7 +232,7 @@ class DeleteInviteHandler(webapp2.RequestHandler):
     def post(self):
         user = util.get_user_from_session()
         bout_id = self.request.get('bout_id')
-        invite = Invited.get_by_key_name (bout_id, parent=user)
+        invite = Invited.get_by_key_name(bout_id, parent=user)
         if invite:
             invite.delete()
 
