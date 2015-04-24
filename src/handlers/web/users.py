@@ -12,6 +12,7 @@ from model.user import User
 from model.photo import Photo
 from model.winner import Winner
 from model.notification import Notification
+from model.invited import Invited
 from model.third_party_user import ThirdPartyUser
 from search_documents.user_document import create_user_search_document, fetch
 from util import util
@@ -133,6 +134,7 @@ class NotificationsHandler(webapp2.RequestHandler):
                 notification_dict['timestamp'] = notification.timestamp.strftime('%x %X')
                 notification_dict['facebook_id'] = ThirdPartyUser.for_(user, 'FB').network_id
                 notification_dict['type'] = notification.notification_type
+                notification_dict['invited_by'] = Invited.for_(user, notification.bout).invited_by.name
                 response.append(notification_dict)
         self.response.write(json.dumps(response))
 

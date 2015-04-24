@@ -5,5 +5,9 @@ class Invited(db.Model):
     invited_by = db.ReferenceProperty(indexed=False)
 
     @classmethod
-    def for_(cls, user):
+    def for_user(cls, user):
         return cls.all().ancestor(user).fetch(None)
+
+    @classmethod
+    def for_(cls, user, bout):
+    	return cls.get_by_key_name(str(bout.id), parent=user)
