@@ -50,6 +50,7 @@ class AddPhotoHandler(blobstore_handlers.BlobstoreUploadHandler):
         image_blob_key = str(self.get_uploads()[0].key())
         bout = Bout.get_by_id(bout_id)
         photo = Photo.create(bout, user, image_blob_key)
+        Notification.create('photo_add', user, bout)
         
     @util.login_required
     def get(self):
@@ -133,6 +134,7 @@ class PhotoVoteHandler(webapp2.RequestHandler):
         bout = Bout.get_by_id(bout_id)
         photo = Photo.get_by_key_name(owner_email, parent=bout)
         self.create_vote(email, photo)
+        Notification.create('photo_vote', user, bout)
 
 class AddCommentHandler(webapp2.RequestHandler):
     def create_comment(self, user, bout, message):
@@ -146,6 +148,7 @@ class AddCommentHandler(webapp2.RequestHandler):
         bout_id = long(self.request.get('bout_id'))
         bout = Bout.get_by_id(bout_id)
         self.create_comment(user, bout, message)
+        Notification.create('comment_add', user, bout)
 
     def get(self):
         template_values = {}
