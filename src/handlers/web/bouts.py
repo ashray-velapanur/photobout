@@ -16,6 +16,7 @@ from model.photo import Photo
 from model.vote import Vote
 from model.comment import Comment
 from model.invited import Invited
+from model.notification import Notification
 from util import util
 from search_documents.user_document import create_user_search_document
 from search_documents.search_documents import BoutDocument
@@ -192,19 +193,15 @@ class AddInviteHandler(webapp2.RequestHandler):
         ids_str = self.request.get('ids')
         logging.info('Ids string: '+ids_str)
         ids = ids_str.split(';')
-        #name = self.request.get('name')
         bout_id = self.request.get('bout_id')
         invited_by = util.get_user_from_session()
         for id in ids:
-            if id:
-                tpu = ThirdPartyUser.for_network_id(id)
-                if tpu:
-                    user = tpu.parent()
-                    #if not user:
-                    #    user = User(key_name=email, name=name)
-                    #    user.put()
-                    #    create_user_search_document(user)
-                    Invited(key_name=bout_id, parent=user, timestamp=datetime.datetime.now(), invited_by=invited_by).put()
+            tpu = ThirdPartyUser.for_network_id(id)
+            if tpu:
+                user = tpu.user
+                bout = Bout.get_by_id(long(bout_id))
+                Invited(key_name=bout_id, parent=user, timestamp=datetime.datetime.now(), invited_by=invited_by).put()
+                Notification.create('invited', user, invited_by.name, bout.name)
         self.response.write(json.dumps('Invitations sent'))
 
 class GetInvitesHandler(webapp2.RequestHandler):
