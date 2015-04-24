@@ -121,7 +121,7 @@ class UsersWinsHandler(webapp2.RequestHandler):
         response = [util.make_bout_dict(win.bout, user.email) for win in Winner.for_user(user)]
         self.response.write(json.dumps(response))
 
-class NotificationsHandler(webapp2.RequestHandler):
+class GetNotificationsHandler(webapp2.RequestHandler):
     @util.login_required
     def get(self):
         user = util.get_user_from_session()
@@ -132,22 +132,20 @@ class NotificationsHandler(webapp2.RequestHandler):
             notification_type = notification.notification_type
             bout = notification.bout
             notification_dict = {}
-            notification_dict['data'] = {}
             notification_dict['type'] = notification_type
             notification_dict['timestamp'] = notification.timestamp.strftime('%x %X')
             notification_dict['facebook_id'] = facebook_id
+            notification_dict['bout'] = util.make_bout_dict(bout, user.email)
             if notification_type == 'invited':
-                notification_dict['data']['bout'] = util.make_bout_dict(bout, user.email)
-                notification_dict['data']['invited_by'] = Invited.for_(user, bout).invited_by.name
+                notification_dict['invited_by'] = Invited.for_(user, bout).invited_by.name
             elif notification_type == 'winner':
-                notification_dict['data']['bout'] = util.make_bout_dict(bout, user.email)
-                notification_dict['data']['winner'] = Winner.for_(user, bout).user.name
+                notification_dict['winner'] = Winner.for_(user, bout).user.name
             response.append(notification_dict)
         self.response.write(json.dumps(response))
 
 application = webapp2.WSGIApplication([ ('/users/signup', SignupHandler),
                                         ('/users/logout', LogoutHandler),
-                                        ('/users/notifications', NotificationsHandler),
+                                        ('/users/notifications/get', GetNotificationsHandler),
                                         ('/users/list', ListUsersHandler),
                                         ('/users/bouts', UsersBoutsHandler),
                                         ('/users/wins', UsersWinsHandler),
