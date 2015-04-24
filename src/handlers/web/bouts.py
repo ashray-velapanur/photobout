@@ -201,7 +201,7 @@ class AddInviteHandler(webapp2.RequestHandler):
                 user = tpu.user
                 bout = Bout.get_by_id(long(bout_id))
                 Invited(key_name=bout_id, parent=user, timestamp=datetime.datetime.now(), invited_by=invited_by).put()
-                Notification.create('invited', user)
+                Notification.create('invited', user, bout)
         self.response.write(json.dumps('Invitations sent'))
 
 class GetInvitesHandler(webapp2.RequestHandler):

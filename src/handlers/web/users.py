@@ -11,6 +11,7 @@ from google.appengine.ext.webapp import template
 from model.user import User
 from model.photo import Photo
 from model.winner import Winner
+from model.notification import Notification
 from model.third_party_user import ThirdPartyUser
 from search_documents.user_document import create_user_search_document, fetch
 from util import util
@@ -119,8 +120,25 @@ class UsersWinsHandler(webapp2.RequestHandler):
         response = [util.make_bout_dict(win.bout, user.email) for win in Winner.for_(user)]
         self.response.write(json.dumps(response))
 
+class NotificationsHandler(webapp2.RequestHandler):
+    @util.login_required
+    def get(self):
+        user = util.get_user_from_session()
+        notifications = Notification.for_(user)
+        response = []
+        for notification in notifications:
+            notification_dict = {}
+            if notification.notification_type == 'invited':
+                notification_dict['bout'] = util.make_bout_dict(notification.bout, user.email)
+                notification_dict['timestamp'] = notification.timestamp.strftime('%x %X')
+                notification_dict['facebook_id'] = ThirdPartyUser.for_(user, 'FB').network_id
+                notification_dict['type'] = notification.notification_type
+                response.append(notification_dict)
+        self.response.write(json.dumps(response))
+
 application = webapp2.WSGIApplication([ ('/users/signup', SignupHandler),
                                         ('/users/logout', LogoutHandler),
+                                        ('/users/notifications', NotificationsHandler),
                                         ('/users/list', ListUsersHandler),
                                         ('/users/bouts', UsersBoutsHandler),
                                         ('/users/wins', UsersWinsHandler),
