@@ -2,6 +2,7 @@ import logging
 
 from google.appengine.ext import deferred
 from gaesessions import get_current_session
+from google.appengine.api import mail
 
 from model.vote import Vote
 from model.photo import Photo
@@ -11,6 +12,19 @@ from model.bout import Bout
 from model.comment import Comment
 from model.notification import Notification
 from model.third_party_user import ThirdPartyUser
+
+MAIL_TEMPLATES = {
+    'forgot_password': {
+        'subject': 'Password Reset',
+        'body': "Click to reset password: {template_values[reset_link]}"
+    }
+}
+
+def send_mail(to, template, **kwargs):
+    subject = MAIL_TEMPLATES[template]['subject']
+    body = MAIL_TEMPLATES[template]['body'].format(template_values=kwargs)
+    sender = "support@b-eagles.com"
+    mail.send_mail(sender=sender, to=to, subject=subject, body=body)
 
 def make_bout_dict(bout, email):
     bout_dict = {}
