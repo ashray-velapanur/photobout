@@ -23,12 +23,14 @@ def make_bout_dict(bout, email):
     for photo in Photo.for_(bout):
         photo_dict = {}
         owner = User.get_by_key_name(photo.owner_email)
+        facebook_user = ThirdPartyUser.for_(owner, 'FB')
         photo_dict['image'] = photo.image_url
         photo_dict['owner_email'] = photo.owner_email
         photo_dict['owner_name'] = owner.name
         photo_dict['num_votes'] = len(Vote.for_(photo))
         photo_dict['is_voted'] = Vote.is_voted(email, photo)
-        photo_dict['facebook_id'] = ThirdPartyUser.get_by_key_name('FB', parent=owner).network_id
+        if facebook_user:
+            photo_dict['facebook_id'] = facebook_user.network_id
         bout_dict['photos'].append(photo_dict)
     return bout_dict
 

@@ -36,9 +36,9 @@ class LoginHandler(webapp2.RequestHandler):
         email = self.request.get('email')
         password = self.request.get('password')
         if self.check_password(email, password):
-            self.set_session(email)
-        response['email'] = email
-        return response
+            util.set_session(email)
+            response['email'] = email
+            return response
 
     def handle_facebook_login(self):
         response = {}
