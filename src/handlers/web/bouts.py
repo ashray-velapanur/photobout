@@ -164,10 +164,12 @@ class GetCommentsHandler(webapp2.RequestHandler):
         response = []
         for comment in Comment.for_(bout):
             comment_dict = {}
+            facebook_user = ThirdPartyUser.for_(comment.user, 'FB')
             comment_dict['name'] = comment.user.name
             comment_dict['message'] = comment.message
             comment_dict['timestamp'] = comment.timestamp.strftime('%x %X')
-            comment_dict['facebook_id'] = ThirdPartyUser.get_by_key_name('FB', parent=comment.user).network_id
+            if facebook_user:
+                comment_dict['facebook_id'] = facebook_user.network_id
             response.append(comment_dict)
         self.response.write(json.dumps(response))
 
@@ -181,11 +183,13 @@ class LeaderboardHandler(webapp2.RequestHandler):
         for rank, photo in enumerate(sorted(Photo.for_(bout), key=lambda x: len(Vote.for_(x)), reverse=True), start=1):
             user_dict = {}
             owner = User.get_by_key_name(photo.owner_email)
+            facebook_user = ThirdPartyUser.for_(owner, 'FB')
             user_dict['votes'] = len(Vote.for_(photo))
             user_dict['rank'] = rank
             user_dict['email'] = photo.owner_email
             user_dict['name'] = owner.name
-            user_dict['facebook_id'] = ThirdPartyUser.get_by_key_name('FB', parent=owner).network_id
+            if facebook_user:
+                user_dict['facebook_id'] = facebook_user.network_id
             response.append(user_dict)
         self.response.write(json.dumps(response))
 
@@ -217,7 +221,6 @@ class GetInvitesHandler(webapp2.RequestHandler):
         for invite in Invited.for_(user):
             invite_dict = {}
             bout_id = long(invite.key().name())
-            logging.info(bout_id)
             bout = Bout.get_by_id(bout_id)
             invite_dict['bout'] = util.make_bout_dict(bout, email)
             invite_dict['timestamp'] = invite.timestamp.strftime('%x %X')
