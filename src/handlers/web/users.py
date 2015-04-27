@@ -114,7 +114,7 @@ class GetNotificationsHandler(webapp2.RequestHandler):
     @util.login_required
     def get(self):
         user = util.get_user_from_session()
-        facebook_id = ThirdPartyUser.for_(user, 'FB').network_id
+        facebook_user = ThirdPartyUser.for_(user, 'FB')
         notifications = Notification.for_(user)
         response = []
         for notification in notifications:
@@ -123,7 +123,8 @@ class GetNotificationsHandler(webapp2.RequestHandler):
             notification_dict = {}
             notification_dict['type'] = notification_type
             notification_dict['timestamp'] = notification.timestamp.strftime('%x %X')
-            notification_dict['facebook_id'] = facebook_id
+            if facebook_user:
+                notification_dict['facebook_id'] = facebook_user.network_id
             notification_dict['bout'] = util.make_bout_dict(bout, user.email)
             if notification_type == 'invited':
                 notification_dict['invited_by'] = Invited.for_(user, bout).invited_by.name
