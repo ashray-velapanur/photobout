@@ -5,6 +5,10 @@ class ThirdPartyUser(db.Model):
     id = db.StringProperty(indexed=False)
     network_id = db.StringProperty(indexed=True)
 
+    @classmethod
+    def create(cls, network, user, access_token, id):
+        cls(key_name=network, parent=user, access_token=access_token, network_id=id).put()
+
     @staticmethod
     def for_user(user):
         return ThirdPartyUser.all().ancestor(user)

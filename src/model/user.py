@@ -9,7 +9,9 @@ class User(db.Model):
     password = db.StringProperty(indexed=False)
 
     @classmethod
-    def create(cls, email, name, password):
+    def create(cls, email, name, password=None):
+        if not password:
+            password = 'makethisrandom'
         password_hash = generate_password_hash(password, pepper=PEPPER)
         user = cls(key_name=email, name=name, password=password_hash)
         user.put()

@@ -19,27 +19,17 @@ from util import util
 from config import PEPPER
 
 class SignupHandler(webapp2.RequestHandler):
-    def create_user(self, email, name, password):
-        password_hash = generate_password_hash(password, pepper=PEPPER)
-        user = User(key_name=email, name=name, password=password_hash)
-        user.put()
-        create_user_search_document(user)
-
     def post(self):
         email = self.request.get('email')
         name = self.request.get('name')
         password = self.request.get('password')
         confirm_password = self.request.get('confirm_password')
-        self.create_user(email, name, password)
+        User.create(email, name, password)
 
 class LoginHandler(webapp2.RequestHandler):
     def check_password(self, email, password):
         password_hash = User.get_by_key_name(email).password
         return check_password_hash(password, password_hash, pepper=PEPPER)
-
-    def set_session(self, email):
-        session = get_current_session()
-        session['email'] = email
 
     def handle_custom_login(self):
         response = {}
@@ -61,11 +51,10 @@ class LoginHandler(webapp2.RequestHandler):
         id = profile['id']
         user = User.get_by_key_name(email)
         if not user:
-            user = User(key_name=email, name=name)
-            user.put()
+            user = User.create(email, name)
             create_user_search_document(user)
-        ThirdPartyUser(key_name='FB', parent=user, access_token=access_token, network_id=user_id).put()
-        self.set_session(email)
+        ThirdPartyUser.create('FB', user, access_token, id)
+        util.set_session(email)
         response['email'] = email
         return response
 
