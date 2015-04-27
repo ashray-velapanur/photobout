@@ -67,7 +67,8 @@ def _get_third_party_names(user):
 
 def create_user_search_document(user, save = True):
     other_names = _get_third_party_names(user)
-    facebook_id = ThirdPartyUser.for_(user, 'FB').network_id
+    facebook_user = ThirdPartyUser.for_(user, 'FB')
+    facebook_id = facebook_user.network_id if facebook_user else None
     return _create(user.email, user.name, facebook_id, other_names, should_save = save)
 
 def _create(doc_id, name = None, facebook_id = None, other_names = None, suggestions = None, should_save = True):
