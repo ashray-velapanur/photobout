@@ -4,6 +4,8 @@ from google.appengine.ext import db
 
 from config import PEPPER
 
+from search_documents.search_documents import UserDocument
+
 class User(db.Model):
     name = db.StringProperty(indexed=False)
     first_name = db.StringProperty(indexed=False)
@@ -16,6 +18,7 @@ class User(db.Model):
             password = 'makethisrandom'
         password_hash = generate_password_hash(password, pepper=PEPPER)
         user = cls(key_name=email, first_name=first_name, last_name=last_name, password=password_hash)
+        UserDocument().create(email, name="%s %s"%(first_name, last_name))
         user.put()
         return user
 

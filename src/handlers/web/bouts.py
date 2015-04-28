@@ -18,7 +18,6 @@ from model.comment import Comment
 from model.invited import Invited
 from model.notification import Notification
 from util import util
-from search_documents.user_document import create_user_search_document
 from search_documents.search_documents import BoutDocument
 
 class CreateBoutHandler(webapp2.RequestHandler):

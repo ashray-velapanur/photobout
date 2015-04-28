@@ -53,4 +53,10 @@ class BoutDocument(SearchDocument):
         self.fields = {'name': search.TextField, 'description': search.TextField}
         super(BoutDocument, self).__init__(self.index_name)
 
+class UserDocument(SearchDocument):
+    def __init__(self):
+        self.index_name = 'users'
+        self.fields = {'name': search.TextField, 'facebook_id': search.TextField}
+        super(UserDocument, self).__init__(self.index_name)
+
 

@@ -14,7 +14,7 @@ from model.winner import Winner
 from model.notification import Notification
 from model.invited import Invited
 from model.third_party_user import ThirdPartyUser
-from search_documents.user_document import create_user_search_document, fetch
+from search_documents.search_documents import UserDocument
 from util import util
 from config import PEPPER
 
@@ -66,7 +66,6 @@ class LoginHandler(webapp2.RequestHandler):
             user = User.get_by_key_name(email)
             if not user:
                 user = User.create(email, profile['first_name'], profile['last_name'])
-                create_user_search_document(user)
             ThirdPartyUser.create('FB', user, access_token, id)
             util.set_session(email)
             response = {"success": True, "email": email, "first_name": user.first_name, "last_name": user.last_name}
@@ -101,8 +100,8 @@ class ListUsersHandler(webapp2.RequestHandler):
 class UsersSearchHandler(webapp2.RequestHandler):
     def post(self):
         search_string = self.request.get('search_string')
-        user_docs = fetch('(suggestions:"%s" OR name:"%s")' % (search_string, search_string), None, limit=100, sort_options=search.SortOptions(expressions=[search.SortExpression(expression='name', direction=search.SortExpression.ASCENDING)]))
-        self.response.write(json.dumps({'users': [{'name':user.name, 'email':user.doc_id, 'facebook_id': user.facebook_id} for user in user_docs.results]}))
+        results = UserDocument().fetch(search_string)
+        self.response.write(json.dumps({'users': [{'name': user['fields']['name'], 'email': user['id'], 'facebook_id': ThirdPartyUser.for_(User.get_by_key_name(user['id']), 'FB').network_id} for user in results]}))
 
 class LogoutHandler(webapp2.RequestHandler):
     @util.login_required
