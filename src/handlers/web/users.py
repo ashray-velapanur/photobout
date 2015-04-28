@@ -7,6 +7,8 @@ from gaesessions import get_current_session, set_current_session
 
 from google.appengine.api import urlfetch, search
 from google.appengine.ext.webapp import template
+from google.appengine.ext.webapp import blobstore_handlers
+from google.appengine.ext import blobstore
 
 from model.user import User
 from model.photo import Photo
@@ -146,7 +148,7 @@ class GetNotificationsHandler(webapp2.RequestHandler):
             response.append(notification_dict)
         self.response.write(json.dumps(response))
 
-class AddProfilePictureHandler(blobstore_handlers.BlobstoreDownloadHandler):
+class AddProfilePictureHandler(blobstore_handlers.BlobstoreUploadHandler):
     @util.login_required
     def post(self):
         user = util.get_user_from_session()
@@ -166,11 +168,19 @@ class GetProfilePictureHandler(blobstore_handlers.BlobstoreDownloadHandler):
         blob_info = blobstore.BlobInfo.get(blob_key)
         self.send_blob(blob_info)
 
+class AddProfilePicturePageHandler(webapp2.RequestHandler):
+    @util.login_required
+    def get(self):
+        template_values = {'upload_url': blobstore.create_upload_url('/users/profile_picture/add')}
+        path = 'templates/add_profile_photo.html'
+        self.response.out.write(template.render(path, template_values))
+
 application = webapp2.WSGIApplication([ ('/users/signup', SignupHandler),
                                         ('/users/logout', LogoutHandler),
                                         ('/users/notifications/get', GetNotificationsHandler),
                                         ('/users/profile_picture/add', AddProfilePictureHandler),
                                         ('/users/profile_picture/get', GetProfilePictureHandler),
+                                        ('/users/profile_picture/add_page', AddProfilePicturePageHandler),
                                         ('/users/list', ListUsersHandler),
                                         ('/users/bouts', UsersBoutsHandler),
                                         ('/users/wins', UsersWinsHandler),
