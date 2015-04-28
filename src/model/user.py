@@ -6,14 +6,16 @@ from config import PEPPER
 
 class User(db.Model):
     name = db.StringProperty(indexed=False)
+    first_name = db.StringProperty(indexed=False)
+    last_name = db.StringProperty(indexed=False)
     password = db.StringProperty(indexed=False)
 
     @classmethod
-    def create(cls, email, name, password=None):
+    def create(cls, email, first_name, last_name, password=None):
         if not password:
             password = 'makethisrandom'
         password_hash = generate_password_hash(password, pepper=PEPPER)
-        user = cls(key_name=email, name=name, password=password_hash)
+        user = cls(key_name=email, first_name=first_name, last_name=last_name, password=password_hash)
         user.put()
         return user
 
