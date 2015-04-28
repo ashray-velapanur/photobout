@@ -8,11 +8,11 @@ from model.vote import Vote
 from model.comment import Comment
 
 def setup():
-	user_1 = User.create('email1', 'name1', 'password1')
+	user_1 = User.create('email1', 'firstname1', 'lastname1', 'password1')
 	tp_user_1 = ThirdPartyUser(key_name='FB', parent=user_1)
 	tp_user_1.network_id = 'fb_id_1'
 	tp_user_1.put()
-	user_2 = User.create('email2', 'name2', 'password2')
+	user_2 = User.create('email2', 'firstname2', 'lasstname2', 'password2')
 	tp_user_2 = ThirdPartyUser(key_name='FB', parent=user_2)
 	tp_user_2.network_id = 'fb_id_2'
 	tp_user_2.put()
