@@ -1,6 +1,7 @@
 from webapp2_extras.security import generate_password_hash, check_password_hash
 
 from google.appengine.ext import db
+from google.appengine.ext import blobstore
 
 from config import PEPPER
 
@@ -11,6 +12,7 @@ class User(db.Model):
     first_name = db.StringProperty(indexed=False)
     last_name = db.StringProperty(indexed=False)
     password = db.StringProperty(indexed=False)
+    profile_picture = db.StringProperty(indexed=False)
 
     @classmethod
     def create(cls, email, first_name, last_name, password=None):
@@ -29,3 +31,9 @@ class User(db.Model):
     @staticmethod
     def get_by_email(email):
         return User.all().filter('email =',email)
+
+    def update_profile_picture(self, blob_key):
+        if self.profile_picture:
+            blobstore.delete(blob_key)
+        self.profile_picture = blob_key
+        self.put()

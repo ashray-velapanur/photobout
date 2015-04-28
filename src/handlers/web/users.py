@@ -146,9 +146,31 @@ class GetNotificationsHandler(webapp2.RequestHandler):
             response.append(notification_dict)
         self.response.write(json.dumps(response))
 
+class AddProfilePictureHandler(blobstore_handlers.BlobstoreDownloadHandler):
+    @util.login_required
+    def post(self):
+        user = util.get_user_from_session()
+        image_blob_key = str(self.get_uploads()[0].key())
+        user.update_profile_picture(image_blob_key)
+
+    @util.login_required
+    def get(self):
+        response = {'upload_url': blobstore.create_upload_url('/users/profile_picture/add')}
+        self.response.write(json.dumps(response))
+
+class GetProfilePictureHandler(blobstore_handlers.BlobstoreDownloadHandler):
+    @util.login_required
+    def get(self):
+        user = util.get_user_from_session()
+        blob_key = user.profile_picture
+        blob_info = blobstore.BlobInfo.get(blob_key)
+        self.send_blob(blob_info)
+
 application = webapp2.WSGIApplication([ ('/users/signup', SignupHandler),
                                         ('/users/logout', LogoutHandler),
                                         ('/users/notifications/get', GetNotificationsHandler),
+                                        ('/users/profile_picture/add', AddProfilePictureHandler),
+                                        ('/users/profile_picture/get', GetProfilePictureHandler),
                                         ('/users/list', ListUsersHandler),
                                         ('/users/bouts', UsersBoutsHandler),
                                         ('/users/wins', UsersWinsHandler),
