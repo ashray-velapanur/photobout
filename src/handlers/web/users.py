@@ -31,6 +31,7 @@ class SignupHandler(webapp2.RequestHandler):
                 response = {"success": False, "error": "Email already in use."}
             else:
                 User.create(email, first_name, last_name, password)
+                util.set_session(email)
                 response = {"success": True}
         else:
             response = {"success": False, "error": "Passwords don't match."}
