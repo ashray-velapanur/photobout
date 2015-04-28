@@ -40,7 +40,8 @@ def make_bout_dict(bout, email):
         facebook_user = ThirdPartyUser.for_(owner, 'FB')
         photo_dict['image'] = photo.image_url
         photo_dict['owner_email'] = photo.owner_email
-        photo_dict['owner_name'] = owner.name
+        photo_dict['owner_first_name'] = owner.first_name
+        photo_dict['owner_last_name'] = owner.last_name
         photo_dict['num_votes'] = len(Vote.for_(photo))
         photo_dict['is_voted'] = Vote.is_voted(email, photo)
         if facebook_user:
