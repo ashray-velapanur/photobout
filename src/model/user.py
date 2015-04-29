@@ -34,6 +34,6 @@ class User(db.Model):
 
     def update_profile_picture(self, blob_key):
         if self.profile_picture:
-            blobstore.delete(blob_key)
+            blobstore.delete(self.profile_picture)
         self.profile_picture = blob_key
         self.put()
