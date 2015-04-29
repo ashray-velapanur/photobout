@@ -163,7 +163,8 @@ class AddProfilePictureHandler(blobstore_handlers.BlobstoreUploadHandler):
 class GetProfilePictureHandler(blobstore_handlers.BlobstoreDownloadHandler):
     @util.login_required
     def get(self):
-        user = util.get_user_from_session()
+        email = self.request.get('email')
+        user = User.get_by_key_name(email)
         blob_key = user.profile_picture
         blob_info = blobstore.BlobInfo.get(blob_key)
         self.send_blob(blob_info)
