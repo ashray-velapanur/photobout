@@ -164,7 +164,8 @@ class GetCommentsHandler(webapp2.RequestHandler):
         for comment in Comment.for_(bout):
             comment_dict = {}
             facebook_user = ThirdPartyUser.for_(comment.user, 'FB')
-            comment_dict['name'] = comment.user.name
+            comment_dict['first_name'] = comment.user.first_name
+            comment_dict['last_name'] = comment.user.last_name
             comment_dict['message'] = comment.message
             comment_dict['timestamp'] = comment.timestamp.strftime('%x %X')
             if facebook_user:
@@ -216,6 +217,7 @@ class GetInvitesHandler(webapp2.RequestHandler):
     def get(self):
         user = util.get_user_from_session()
         email = user.email
+        facebook_user = ThirdPartyUser.for_(user, 'FB')
         response = []
         for invite in Invited.for_(user):
             invite_dict = {}
@@ -223,7 +225,8 @@ class GetInvitesHandler(webapp2.RequestHandler):
             bout = Bout.get_by_id(bout_id)
             invite_dict['bout'] = util.make_bout_dict(bout, email)
             invite_dict['timestamp'] = invite.timestamp.strftime('%x %X')
-            invite_dict['facebook_id'] = ThirdPartyUser.get_by_key_name('FB', parent=invite.invited_by).network_id
+            if facebook_user:
+                invite_dict['facebook_id'] = facebook_user.network_id
             invite_dict['invited_by_name'] = invite.invited_by.name
             response.append(invite_dict)
         self.response.write(json.dumps(response))
