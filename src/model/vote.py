@@ -1,14 +1,25 @@
 from google.appengine.ext import db
 
+import logging
+
 class Vote(db.Model):
+    photo = db.ReferenceProperty()
+
     @classmethod
     def create(cls, email, photo):
-        cls(key_name=email, parent=photo).put()
+        cls(key_name=email, parent=photo.bout, photo=photo).put()
 
     @classmethod
     def for_(cls, photo):
-        return cls.all().ancestor(photo).fetch(None)
+        return cls.all().filter('photo', photo).fetch(None)
+
+    @classmethod
+    def count(cls, photo):
+        return cls.all().ancestor(photo.bout).filter('photo', photo).count()
 
     @classmethod
     def is_voted(cls, email, photo):
-        return True if cls.get_by_key_name(email, parent=photo) else False
+        vote = cls.get_by_key_name(email, parent=photo.bout)
+        if vote and vote.photo.owner_email == photo.owner_email:
+            return True
+        return False

@@ -42,7 +42,7 @@ def make_bout_dict(bout, email):
         photo_dict['owner_email'] = photo.owner_email
         photo_dict['owner_first_name'] = owner.first_name
         photo_dict['owner_last_name'] = owner.last_name
-        photo_dict['num_votes'] = len(Vote.for_(photo))
+        photo_dict['num_votes'] = Vote.count(photo)
         photo_dict['is_voted'] = Vote.is_voted(email, photo)
         if facebook_user:
             photo_dict['facebook_id'] = facebook_user.network_id
@@ -53,7 +53,7 @@ def schedule_end(bout):
     deferred.defer(set_winner, bout, _eta=bout.end_time)
 
 def set_winner(bout):
-    winner = User.get_by_key_name(sorted(Photo.for_(bout), key=lambda x: len(Vote.for_(x)), reverse=True)[0].owner_email)
+    winner = User.get_by_key_name(sorted(Photo.for_(bout), key=lambda x: Vote.count(x), reverse=True)[0].owner_email)
     Winner.create(winner, bout)
     Notification.create('winner', winner, bout)
     bout.change_status(2)

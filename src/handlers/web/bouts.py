@@ -125,14 +125,14 @@ class PhotoVoteHandler(webapp2.RequestHandler):
 
     @util.login_required
     @util.bout_permission_required
-    def post(self):
+    def get(self):
         user = util.get_user_from_session()
         email = user.key().name()
         owner_email = self.request.get('owner_email')
         bout_id = long(self.request.get('bout_id'))
         bout = Bout.get_by_id(bout_id)
         photo = Photo.get_by_key_name(owner_email, parent=bout)
-        self.create_vote(email, photo)
+        Vote.create(email, photo)
         Notification.create('photo_vote', user, bout)
 
 class AddCommentHandler(webapp2.RequestHandler):
@@ -180,7 +180,7 @@ class LeaderboardHandler(webapp2.RequestHandler):
         response = []
         bout_id = long(self.request.get('bout_id'))
         bout = Bout.get_by_id(bout_id)
-        for rank, photo in enumerate(sorted(Photo.for_(bout), key=lambda x: len(Vote.for_(x)), reverse=True), start=1):
+        for rank, photo in enumerate(sorted(Photo.for_(bout), key=lambda x: Vote.count(x), reverse=True), start=1):
             user_dict = {}
             owner = User.get_by_key_name(photo.owner_email)
             facebook_user = ThirdPartyUser.for_(owner, 'FB')
