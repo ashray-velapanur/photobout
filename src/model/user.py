@@ -24,6 +24,18 @@ class User(db.Model):
         user.put()
         return user
 
+    @classmethod
+    def update(cls, email, first_name=None, last_name=None, profile_picture=None):
+        user = cls.get_by_key_name(email)
+        if first_name:
+            user.first_name = first_name
+        if last_name:
+            user.last_name = last_name
+        if profile_picture:
+            blobstore.delete(user.profile_picture)
+            user.profile_picture = profile_picture
+        user.put()
+
     @property
     def email(self):
         return self.key().name()

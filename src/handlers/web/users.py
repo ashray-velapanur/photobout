@@ -176,8 +176,17 @@ class AddProfilePicturePageHandler(webapp2.RequestHandler):
         path = 'templates/add_profile_photo.html'
         self.response.out.write(template.render(path, template_values))
 
+class UpdateProfileHandler(webapp2.RequestHandler):
+    @util.login_required
+    def get(self):
+        user = util.get_user_from_session()
+        first_name = self.request.get('first_name')
+        last_name = self.request.get('last_name')
+        User.update(user.email, first_name, last_name)
+
 application = webapp2.WSGIApplication([ ('/users/signup', SignupHandler),
                                         ('/users/logout', LogoutHandler),
+                                        ('/users/update_profile', UpdateProfileHandler),
                                         ('/users/notifications/get', GetNotificationsHandler),
                                         ('/users/profile_picture/add', AddProfilePictureHandler),
                                         ('/users/profile_picture/get', GetProfilePictureHandler),
