@@ -40,8 +40,8 @@ class Bout(db.Model):
         hours = total_hours%24
         days = total_hours/24
         if days >= 1:
-            return "%s days, %s hours left"%(days, hours)
-        return "%s hours left"%hours
+            return "%s d, %s h left"%(days, hours)
+        return "%s h left"%hours
 
     def change_status(self, status):
         self.status = status
