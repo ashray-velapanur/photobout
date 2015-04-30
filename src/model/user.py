@@ -43,9 +43,3 @@ class User(db.Model):
     @staticmethod
     def get_by_email(email):
         return User.all().filter('email =',email)
-
-    def update_profile_picture(self, blob_key):
-        if self.profile_picture:
-            blobstore.delete(self.profile_picture)
-        self.profile_picture = blob_key
-        self.put()
