@@ -193,7 +193,8 @@ class LeaderboardHandler(webapp2.RequestHandler):
             user_dict['votes'] = Vote.count(photo)
             user_dict['rank'] = rank
             user_dict['email'] = photo.owner_email
-            user_dict['name'] = owner.name
+            user_dict['first_name'] = owner.first_name
+            user_dict['last_name'] = owner.last_name
             if facebook_user:
                 user_dict['facebook_id'] = facebook_user.network_id
             response.append(user_dict)
