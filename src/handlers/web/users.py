@@ -178,7 +178,7 @@ class AddProfilePicturePageHandler(webapp2.RequestHandler):
 
 class UpdateProfileHandler(webapp2.RequestHandler):
     @util.login_required
-    def get(self):
+    def post(self):
         user = util.get_user_from_session()
         first_name = self.request.get('first_name')
         last_name = self.request.get('last_name')
