@@ -10,8 +10,8 @@ class Vote(db.Model):
         cls(key_name=email, parent=photo.bout, photo=photo).put()
 
     @classmethod
-    def for_(cls, photo):
-        return cls.all().filter('photo', photo).fetch(None)
+    def for_(cls, email, bout):
+        return cls.get_by_key_name(email, parent=bout)
 
     @classmethod
     def count(cls, photo):

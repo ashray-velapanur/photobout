@@ -125,15 +125,21 @@ class PhotoVoteHandler(webapp2.RequestHandler):
 
     @util.login_required
     @util.bout_permission_required
-    def get(self):
+    def post(self):
+        response = {}
         user = util.get_user_from_session()
         email = user.key().name()
         owner_email = self.request.get('owner_email')
         bout_id = long(self.request.get('bout_id'))
         bout = Bout.get_by_id(bout_id)
         photo = Photo.get_by_key_name(owner_email, parent=bout)
-        Vote.create(email, photo)
-        Notification.create('photo_vote', user, bout)
+        if Vote.for_(email, bout):
+            response = {"success": False, "error": "Already voted on this Bout."}
+        else:
+            Vote.create(email, photo)
+            Notification.create('photo_vote', user, bout)
+            response = {"success": True}
+        self.response.write(json.dumps(response))
 
 class AddCommentHandler(webapp2.RequestHandler):
     def create_comment(self, user, bout, message):
@@ -184,7 +190,7 @@ class LeaderboardHandler(webapp2.RequestHandler):
             user_dict = {}
             owner = User.get_by_key_name(photo.owner_email)
             facebook_user = ThirdPartyUser.for_(owner, 'FB')
-            user_dict['votes'] = len(Vote.for_(photo))
+            user_dict['votes'] = Vote.count(photo)
             user_dict['rank'] = rank
             user_dict['email'] = photo.owner_email
             user_dict['name'] = owner.name
