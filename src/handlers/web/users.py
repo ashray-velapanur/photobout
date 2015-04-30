@@ -163,7 +163,7 @@ class AddProfilePictureHandler(blobstore_handlers.BlobstoreUploadHandler):
     def post(self):
         user = util.get_user_from_session()
         image_blob_key = str(self.get_uploads()[0].key())
-        user.update_profile_picture(image_blob_key)
+        User.update(profile_picture=image_blob_key)
 
     @util.login_required
     def get(self):
@@ -192,7 +192,7 @@ class UpdateProfileHandler(webapp2.RequestHandler):
         user = util.get_user_from_session()
         first_name = self.request.get('first_name')
         last_name = self.request.get('last_name')
-        User.update(user.email, first_name, last_name)
+        User.update(user.email, first_name=first_name, last_name=last_name)
 
 application = webapp2.WSGIApplication([ ('/users/signup', SignupHandler),
                                         ('/users/logout', LogoutHandler),
