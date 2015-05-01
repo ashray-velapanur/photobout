@@ -103,7 +103,17 @@ class UsersSearchHandler(webapp2.RequestHandler):
     def post(self):
         search_string = self.request.get('search_string')
         results = UserDocument().fetch(search_string)
-        self.response.write(json.dumps({'users': [{'name': user['fields']['name'], 'email': user['id'], 'facebook_id': ThirdPartyUser.for_(User.get_by_key_name(user['id']), 'FB').network_id} for user in results]}))
+        response = {}
+        response['users'] = []
+        for user in results:
+            facebook_user = ThirdPartyUser.for_(User.get_by_key_name(user['id']), 'FB')
+            user_dict = {}
+            user_dict['name'] = user['fields']['name']
+            user_dict['name'] = user['id']
+            if facebook_user:
+                user_dict['facebook_id'] = facebook_user.network_id
+            response['users'].append(user_dict)
+        self.response.write(json.dumps(response))
 
 class LogoutHandler(webapp2.RequestHandler):
     @util.login_required
