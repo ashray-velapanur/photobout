@@ -10,7 +10,7 @@ class Bout(db.Model):
     name = db.StringProperty(indexed=False)
     description = db.TextProperty(indexed=False)
     owner = db.ReferenceProperty(indexed=False)
-    created_at = db.DateTimeProperty(indexed=False)
+    created_at = db.DateTimeProperty(indexed=True)
     period = db.IntegerProperty(indexed=False)
     permission = db.IntegerProperty(indexed=False)
     status = db.IntegerProperty()

@@ -35,7 +35,7 @@ def make_bout_dict(bout, email):
     bout_dict['ended'] = bout.ended
     bout_dict['num_comments'] = len(Comment.for_(bout))
     bout_dict['photos'] = []
-    for photo in Photo.for_(bout):
+    for photo in sorted(Photo.for_(bout), key=lambda x: Vote.count(x), reverse=True):
         photo_dict = {}
         owner = User.get_by_key_name(photo.owner_email)
         facebook_user = ThirdPartyUser.for_(owner, 'FB')

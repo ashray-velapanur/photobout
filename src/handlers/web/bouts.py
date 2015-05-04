@@ -73,7 +73,7 @@ class GetPhotoHandler(blobstore_handlers.BlobstoreDownloadHandler):
 class GetBoutsHandler(webapp2.RequestHandler):
     def _get_open_bouts(self, email):
         response = []
-        for bout in Bout.all().filter('status', 1):
+        for bout in Bout.all().filter('status', 1).order("-created_at"):
             if bout.permission == 2:
                 if bout.owner.email != user.email:
                     continue
@@ -82,7 +82,7 @@ class GetBoutsHandler(webapp2.RequestHandler):
 
     def _get_current_bouts(self, email):
         response = []
-        for bout in Bout.all().filter('status', 1):
+        for bout in Bout.all().filter('status', 1).order("-created_at"):
             if bout.permission == 2:
                 if bout.owner.email != user.email:
                     continue
@@ -93,7 +93,7 @@ class GetBoutsHandler(webapp2.RequestHandler):
 
     def _get_past_bouts(self, email):
         response = []
-        for bout in Bout.all().filter('status', 2):
+        for bout in Bout.all().filter('status', 2).order("-created_at"):
             if bout.permission == 2:
                 if bout.owner.email != user.email:
                     continue
