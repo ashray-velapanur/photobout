@@ -32,6 +32,7 @@ def make_bout_dict(bout, email):
     bout_dict['name'] = bout.name
     bout_dict['description'] = bout.description
     bout_dict['time_left'] = bout.time_left_string
+    bout_dict['ended'] = bout.ended
     bout_dict['num_comments'] = len(Comment.for_(bout))
     bout_dict['photos'] = []
     for photo in Photo.for_(bout):

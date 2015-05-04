@@ -36,12 +36,26 @@ class Bout(db.Model):
 
     @property
     def time_left_string(self):
-        total_hours = int(self.time_left.total_seconds())/(3600)
+        time_left_string = ""
+        total_hours = int(abs(self.time_left.total_seconds()))/(3600)
         hours = total_hours%24
         days = total_hours/24
         if days >= 1:
-            return "%s d, %s h left"%(days, hours)
-        return "%s h left"%hours
+            time_left_string += "%s d, %s h "%(days, hours)
+        else:
+            time_left_string += "%s h "%hours
+        if self.ended:
+            time_left_string += "past"
+        else:
+            time_left_string += "left"
+        return time_left_string
+
+    @property
+    def ended(self):
+        if self.time_left.total_seconds() > 0:
+            return False
+        else:
+            return True
 
     def change_status(self, status):
         self.status = status
