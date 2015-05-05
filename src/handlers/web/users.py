@@ -152,6 +152,7 @@ class GetNotificationsHandler(webapp2.RequestHandler):
                 notification_dict['facebook_id'] = facebook_user.network_id
             notification_dict['bout'] = util.make_bout_dict(bout, user.email)
             notification_dict['from'] = notification.from_user
+            notification_dict['message'] = notification.message
             response.append(notification_dict)
         self.response.write(json.dumps(response))
 

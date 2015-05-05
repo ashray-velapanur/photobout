@@ -2,6 +2,14 @@ import datetime
 
 from google.appengine.ext import db
 
+MESSAGES = {
+    'photo_add': 'added a photo to',
+    'photo_vote': 'voted on your',
+    'comment_add': 'commented on',
+    'winner': '',
+    'invited': 'invited you to'
+    }
+
 class Notification(db.Model):
     notification_type = db.StringProperty(indexed=False)
     bout = db.ReferenceProperty(indexed=False)
@@ -16,3 +24,8 @@ class Notification(db.Model):
     @classmethod
     def create(cls, type, user, from_user, bout):
         cls(parent=user, notification_type=type, bout=bout, from_user=from_user, viewed=False, timestamp=datetime.datetime.now()).put()
+
+    @property
+    def message(self):
+        return MESSAGES[self.notification_type]
+  
