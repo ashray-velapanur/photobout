@@ -151,10 +151,8 @@ class GetNotificationsHandler(webapp2.RequestHandler):
             if facebook_user:
                 notification_dict['facebook_id'] = facebook_user.network_id
             notification_dict['bout'] = util.make_bout_dict(bout, user.email)
-            if notification_type == 'invited':
-                notification_dict['invited_by'] = Invited.for_(user, bout).invited_by.name
-            elif notification_type == 'winner':
-                notification_dict['winner'] = Winner.for_(user, bout).user.name
+            if notification_type == 'photo_add':
+                notification_dict['from'] = notification.from_user
             response.append(notification_dict)
         self.response.write(json.dumps(response))
 

@@ -49,7 +49,7 @@ class AddPhotoHandler(blobstore_handlers.BlobstoreUploadHandler):
         image_blob_key = str(self.get_uploads()[0].key())
         bout = Bout.get_by_id(bout_id)
         photo = Photo.create(bout, user, image_blob_key)
-        Notification.create('photo_add', user, bout)
+        Notification.create('photo_add', owner, user, bout)
         
     @util.login_required
     def get(self):
