@@ -61,7 +61,7 @@ def schedule_end(bout):
 def set_winner(bout):
     bout.change_status(2)
     participants = sorted(Photo.for_(bout), key=lambda x: Vote.count(x), reverse=True)
-    if len(participants) > 0:
+    if len(participants) > 0 and Vote.count(participants[0]) > 0:
         winner = User.get_by_key_name(participants[0].owner_email)
         Winner.create(winner, bout)
         Notification.create('winner', winner, None, bout)
