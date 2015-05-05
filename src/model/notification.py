@@ -4,9 +4,9 @@ from google.appengine.ext import db
 
 MESSAGES = {
     'photo_add': 'added a photo to',
-    'photo_vote': 'voted on your',
+    'photo_vote': 'voted on your photo in',
     'comment_add': 'commented on',
-    'winner': '',
+    'winner': 'have won the Bout',
     'invited': 'invited you to'
     }
 
@@ -16,6 +16,18 @@ class Notification(db.Model):
     from_user = db.StringProperty(indexed=False)
     viewed = db.BooleanProperty(indexed=False)
     timestamp = db.DateTimeProperty(indexed=False)
+
+    @property
+    def formatted_timestamp(self):
+        posted_time_string = ""
+        total_hours = int(abs((datetime.datetime.now() - self.timestamp).total_seconds()))/(3600)
+        hours = total_hours%24
+        days = total_hours/24
+        if days >= 1:
+            posted_time_string += "%s d, %s h ago"%(days, hours)
+        else:
+            posted_time_string += "%s h ago"%hours
+        return posted_time_string
 
     @classmethod
     def for_(cls, user):
