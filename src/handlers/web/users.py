@@ -147,7 +147,7 @@ class GetNotificationsHandler(webapp2.RequestHandler):
             bout = notification.bout
             notification_dict = {}
             notification_dict['type'] = notification_type
-            notification_dict['timestamp'] = notification.timestamp.strftime('%x %X')
+            notification_dict['timestamp'] = notification.formatted_timestamp
             if facebook_user:
                 notification_dict['facebook_id'] = facebook_user.network_id
             notification_dict['bout'] = util.make_bout_dict(bout, user.email)
