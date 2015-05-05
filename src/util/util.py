@@ -48,6 +48,11 @@ def make_bout_dict(bout, email):
         if facebook_user:
             photo_dict['facebook_id'] = facebook_user.network_id
         bout_dict['photos'].append(photo_dict)
+    if bout.ended:
+        bout_dict['winner'] = ''
+        winner = Winner.for_bout(bout)
+        if winner:
+            bout_dict['winner'] = winner.user.email
     return bout_dict
 
 def schedule_end(bout):
