@@ -54,10 +54,12 @@ def schedule_end(bout):
     deferred.defer(set_winner, bout, _eta=bout.end_time)
 
 def set_winner(bout):
-    winner = User.get_by_key_name(sorted(Photo.for_(bout), key=lambda x: Vote.count(x), reverse=True)[0].owner_email)
-    Winner.create(winner, bout)
-    Notification.create('winner', winner, bout)
     bout.change_status(2)
+    participants = sorted(Photo.for_(bout), key=lambda x: Vote.count(x), reverse=True)
+    if len(participants) > 0:
+        winner = User.get_by_key_name(participants[0].owner_email)
+        Winner.create(winner, bout)
+        Notification.create('winner', winner, bout)
 
 def _user_has_permission(handler):
 	bout_id = long(handler.request.get('bout_id'))

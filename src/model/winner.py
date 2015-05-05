@@ -1,20 +1,20 @@
 from google.appengine.ext import db
 
 class Winner(db.Model):
-    bout = db.ReferenceProperty(indexed=False)
+    user = db.ReferenceProperty()
 
     @classmethod
     def create(cls, user, bout):
-        cls(key_name=str(bout.id), parent=user, bout=bout).put()
+        cls(parent=bout, user=user).put()
 
     @classmethod
     def for_user(cls, user):
-        return cls.all().ancestor(user).fetch(None)
+        return cls.all().filter('user', user).fetch(None)
 
     @classmethod
-    def for_(cls, user, bout):
-        return cls.get_by_key_name(str(bout.id), parent=user)
+    def for_bout(cls, bout):
+        return cls.all().ancestor(bout).get()
 
     @property
-    def user(self):
+    def bout(self):
         return self.parent()
