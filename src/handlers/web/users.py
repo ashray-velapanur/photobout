@@ -151,8 +151,7 @@ class GetNotificationsHandler(webapp2.RequestHandler):
             if facebook_user:
                 notification_dict['facebook_id'] = facebook_user.network_id
             notification_dict['bout'] = util.make_bout_dict(bout, user.email)
-            if notification_type == 'photo_add':
-                notification_dict['from'] = notification.from_user
+            notification_dict['from'] = notification.from_user
             response.append(notification_dict)
         self.response.write(json.dumps(response))
 

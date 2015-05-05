@@ -75,7 +75,7 @@ class GetBoutsHandler(webapp2.RequestHandler):
         response = []
         for bout in Bout.all().filter('status', 1).order("-created_at"):
             if bout.permission == 2:
-                if bout.owner.email != user.email:
+                if bout.owner.email != email:
                     continue
             response.append(util.make_bout_dict(bout, email))
         return response
@@ -84,7 +84,7 @@ class GetBoutsHandler(webapp2.RequestHandler):
         response = []
         for bout in Bout.all().filter('status', 1).order("-created_at"):
             if bout.permission == 2:
-                if bout.owner.email != user.email:
+                if bout.owner.email != email:
                     continue
             if not Photo.get_by_key_name(email, parent=bout):
                 continue
@@ -95,7 +95,7 @@ class GetBoutsHandler(webapp2.RequestHandler):
         response = []
         for bout in Bout.all().filter('status', 2).order("-created_at"):
             if bout.permission == 2:
-                if bout.owner.email != user.email:
+                if bout.owner.email != email:
                     continue
             response.append(util.make_bout_dict(bout, email))
         return response
@@ -134,7 +134,7 @@ class PhotoVoteHandler(webapp2.RequestHandler):
             response = {"success": False, "error": "Already voted on this Bout."}
         else:
             Vote.create(email, photo)
-            Notification.create('photo_vote', user, bout)
+            Notification.create('photo_vote', bout.owner, user, bout)
             response = {"success": True}
         self.response.write(json.dumps(response))
 
@@ -147,7 +147,7 @@ class AddCommentHandler(webapp2.RequestHandler):
         bout_id = long(self.request.get('bout_id'))
         bout = Bout.get_by_id(bout_id)
         Comment.create(user, bout, message)
-        Notification.create('comment_add', user, bout)
+        Notification.create('comment_add', bout.owner, user, bout)
 
     def get(self):
         template_values = {}
@@ -209,7 +209,7 @@ class AddInviteHandler(webapp2.RequestHandler):
                 user = tpu.user
                 bout = Bout.get_by_id(long(bout_id))
                 Invited(key_name=bout_id, parent=user, timestamp=datetime.datetime.now(), invited_by=invited_by).put()
-                Notification.create('invited', user, bout)
+                Notification.create('invited', user, invited_by.email, bout)
         self.response.write(json.dumps('Invitations sent'))
 
 class GetInvitesHandler(webapp2.RequestHandler):
