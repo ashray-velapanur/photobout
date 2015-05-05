@@ -120,9 +120,6 @@ class GetBoutsHandler(webapp2.RequestHandler):
         self.response.write(json.dumps(response))
 
 class PhotoVoteHandler(webapp2.RequestHandler):
-    def create_vote(self, email, photo):
-        Vote(key_name=email, parent=photo).put()
-
     @util.login_required
     @util.bout_permission_required
     def post(self):
@@ -142,9 +139,6 @@ class PhotoVoteHandler(webapp2.RequestHandler):
         self.response.write(json.dumps(response))
 
 class AddCommentHandler(webapp2.RequestHandler):
-    def create_comment(self, user, bout, message):
-        Comment(parent=bout, user=user, message=message, timestamp=datetime.datetime.now()).put()
-
     @util.login_required
     @util.bout_permission_required
     def post(self):
@@ -152,7 +146,7 @@ class AddCommentHandler(webapp2.RequestHandler):
         message = self.request.get('message')
         bout_id = long(self.request.get('bout_id'))
         bout = Bout.get_by_id(bout_id)
-        self.create_comment(user, bout, message)
+        Comment.create(user, bout, message)
         Notification.create('comment_add', user, bout)
 
     def get(self):
