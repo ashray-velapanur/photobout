@@ -244,9 +244,10 @@ class DeleteInviteHandler(webapp2.RequestHandler):
 
 class TestHandler(webapp2.RequestHandler):
     @util.login_required
-    @util.bout_permission_required
     def get(self):
-        self.response.write('... working')
+        next = self.request.get('next')
+        response = util.fetch_with_cursor(Bout.all(), cursor=next, mapper=util.make_bout_dict)
+        self.response.write(json.dumps(response))
 
 class BoutSearchHandler(webapp2.RequestHandler):
     @util.login_required

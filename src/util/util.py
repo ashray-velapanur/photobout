@@ -20,13 +20,27 @@ MAIL_TEMPLATES = {
     }
 }
 
+def fetch_with_cursor(query, limit=10, cursor=None, mapper=None):
+    response = {}
+    response['data'] = []
+    if cursor:
+        query.with_cursor(start_cursor=cursor)
+    for count, result in enumerate(query):
+        response['data'].append(mapper(result))
+        if count >= limit-1:
+            break
+    response['next'] = None if len(response['data']) < limit else query.cursor()
+    return response
+
 def send_mail(to, template, **kwargs):
     subject = MAIL_TEMPLATES[template]['subject']
     body = MAIL_TEMPLATES[template]['body'].format(template_values=kwargs)
     sender = "support@b-eagles.com"
     mail.send_mail(sender=sender, to=to, subject=subject, body=body)
 
-def make_bout_dict(bout, email):
+def make_bout_dict(bout, email=None):
+    if not email:
+        email = get_email_from_session()
     bout_dict = {}
     bout_dict['id'] = bout.id
     bout_dict['name'] = bout.name
@@ -86,6 +100,10 @@ def bout_permission_required(fn):
 def get_user_from_session():
 	session = get_current_session()
 	return User.get_by_key_name(session['email']) if 'email' in session else None
+
+def get_email_from_session():
+    session = get_current_session()
+    return session['email'] if 'email' in session else None
 
 def set_session(email):
     session = get_current_session()
