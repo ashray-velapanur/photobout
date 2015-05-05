@@ -135,6 +135,9 @@ class UsersWinsHandler(webapp2.RequestHandler):
         response = [util.make_bout_dict(win.bout, user.email) for win in Winner.for_user(user)]
         self.response.write(json.dumps(response))
 
+
+##clean this up!
+
 class GetNotificationsHandler(webapp2.RequestHandler):
     @util.login_required
     def get(self):
@@ -145,13 +148,19 @@ class GetNotificationsHandler(webapp2.RequestHandler):
         for notification in notifications:
             notification_type = notification.notification_type
             bout = notification.bout
+            from_user = User.get_by_key_name(notification.from_user)
+            from_facebook_user = ThirdPartyUser.for_(from_user, 'FB')
             notification_dict = {}
             notification_dict['type'] = notification_type
             notification_dict['timestamp'] = notification.formatted_timestamp
             if facebook_user:
                 notification_dict['facebook_id'] = facebook_user.network_id
             notification_dict['bout'] = util.make_bout_dict(bout, user.email)
-            notification_dict['from'] = notification.from_user
+            notification_dict['from_name'] = notification.from_user
+            if from_user:
+                notification_dict['from_id'] = from_user.email
+            elif from_facebook_user:
+                notification_dict['from_id'] = from_facebook_user.network_id
             notification_dict['message'] = notification.message
             response.append(notification_dict)
         self.response.write(json.dumps(response))
