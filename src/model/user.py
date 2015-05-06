@@ -8,11 +8,14 @@ from config import PEPPER
 from search_documents.search_documents import UserDocument
 
 class User(db.Model):
-    name = db.StringProperty(indexed=False)
     first_name = db.StringProperty(indexed=False)
     last_name = db.StringProperty(indexed=False)
     password = db.StringProperty(indexed=False)
     profile_picture = db.StringProperty(indexed=False)
+
+    @property
+    def name(self):
+        return "%s %s"%(self.first_name, self.last_name)
 
     @classmethod
     def create(cls, email, first_name, last_name, password=None):

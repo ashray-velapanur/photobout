@@ -155,13 +155,15 @@ class GetNotificationsHandler(webapp2.RequestHandler):
             notification_dict['timestamp'] = notification.formatted_timestamp
             if facebook_user:
                 notification_dict['facebook_id'] = facebook_user.network_id
-            notification_dict['bout'] = util.make_bout_dict(bout, user.email)
+            if notification_type == 'winner':
+                notification_dict['from_name'] = 'You'
+            else:
+                notification_dict['from_name'] = from_user.name
             if from_facebook_user:
-                notification_dict['from_name'] = from_user.first_name + ' ' + from_user.last_name
                 notification_dict['from_id'] = from_facebook_user.network_id
             elif from_user:
-                notification_dict['from_name'] = from_user.name
                 notification_dict['from_id'] = from_user.email
+            notification_dict['bout'] = util.make_bout_dict(bout, user.email)
             notification_dict['message'] = notification.message
             response.append(notification_dict)
         self.response.write(json.dumps(response))
