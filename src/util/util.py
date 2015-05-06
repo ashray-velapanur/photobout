@@ -75,7 +75,7 @@ def _user_has_permission(handler):
 	if bout.permission == 1:
 		logging.info('... public bout')
 		return True
-	user = session.get_user_from_session()
+	user = get_user_from_session()
 	if bout.owner.email == user.email:
 		logging.info('... is owner')
 		return True
