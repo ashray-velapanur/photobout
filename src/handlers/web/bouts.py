@@ -70,55 +70,6 @@ class GetPhotoHandler(blobstore_handlers.BlobstoreDownloadHandler):
         blob_info = blobstore.BlobInfo.get(blob_key)
         self.send_blob(blob_info)
 
-class TestHandler(webapp2.RequestHandler):
-    def _get_open_bouts(self, email):
-        response = []
-        for bout in Bout.all().filter('status', 1).order("-created_at"):
-            if bout.permission == 2:
-                if bout.owner.email != email:
-                    continue
-            response.append(util.make_bout_dict(bout, email))
-        return response
-
-    def _get_current_bouts(self, email):
-        response = []
-        for bout in Bout.all().filter('status', 1).order("-created_at"):
-            if bout.permission == 2:
-                if bout.owner.email != email:
-                    continue
-            if not Photo.get_by_key_name(email, parent=bout):
-                continue
-            response.append(util.make_bout_dict(bout, email))
-        return response
-
-    def _get_past_bouts(self, email):
-        response = []
-        for bout in Bout.all().filter('status', 2).order("-created_at"):
-            if bout.permission == 2:
-                if bout.owner.email != email:
-                    continue
-            response.append(util.make_bout_dict(bout, email))
-        return response
-
-    @util.login_required
-    def get(self):
-        user = util.get_user_from_session()
-        email = user.email
-        status = self.request.get('status')
-        bout_id = self.request.get('bout_id')
-        response = []
-        if bout_id and len(bout_id) > 0:
-            bout = Bout.get_by_id(long(bout_id))
-            response.append(util.make_bout_dict(bout, email))
-        else:
-            if status == 'current':
-                response = self._get_current_bouts(email)
-            elif status == 'past':
-                response = self._get_past_bouts(email)
-            else:
-                response = self._get_open_bouts(email)
-        self.response.write(json.dumps(response))
-
 class PhotoVoteHandler(webapp2.RequestHandler):
     @util.login_required
     @util.bout_permission_required
@@ -296,7 +247,6 @@ class BoutSearchHandler(webapp2.RequestHandler):
 
 application = webapp2.WSGIApplication([ ('/bouts/create', CreateBoutHandler),
                                         ('/bouts/get', GetBoutsHandler),
-                                        ('/bouts/test', TestHandler),
                                         ('/bouts/search', BoutSearchHandler),
                                         ('/bouts/leaderboard', LeaderboardHandler),
                                         ('/bouts/photos/add', AddPhotoHandler),
