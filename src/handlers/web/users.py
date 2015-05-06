@@ -144,8 +144,6 @@ def make_notification_dict(notification):
     notification_dict = {}
     notification_dict['type'] = notification_type
     notification_dict['timestamp'] = notification.formatted_timestamp
-    #if facebook_user:
-    #    notification_dict['facebook_id'] = facebook_user.network_id
     if notification_type == 'winner':
         notification_dict['from_name'] = 'You'
     else:
@@ -163,7 +161,6 @@ class GetNotificationsHandler(webapp2.RequestHandler):
     def get(self):
         next = self.request.get('next')
         user = util.get_user_from_session()
-        #facebook_user = ThirdPartyUser.for_(user, 'FB')
         response = util.fetch_with_cursor(Notification.all().ancestor(user).order("-timestamp"), limit=20, cursor=next, mapper=make_notification_dict)
         self.response.write(json.dumps(response))
 
