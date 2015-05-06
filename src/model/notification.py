@@ -18,6 +18,10 @@ class Notification(db.Model):
     timestamp = db.DateTimeProperty(indexed=False)
 
     @property
+    def user(self):
+        return self.parent()
+
+    @property
     def formatted_timestamp(self):
         posted_time_string = ""
         total_hours = int(abs((datetime.datetime.now() - self.timestamp).total_seconds()))/(3600)

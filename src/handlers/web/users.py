@@ -136,36 +136,35 @@ class UsersWinsHandler(webapp2.RequestHandler):
         self.response.write(json.dumps(response))
 
 
-##clean this up!
+def make_notification_dict(notification):
+    notification_type = notification.notification_type
+    bout = notification.bout
+    from_user = User.get_by_key_name(notification.from_user)
+    from_facebook_user = ThirdPartyUser.for_(from_user, 'FB')
+    notification_dict = {}
+    notification_dict['type'] = notification_type
+    notification_dict['timestamp'] = notification.formatted_timestamp
+    #if facebook_user:
+    #    notification_dict['facebook_id'] = facebook_user.network_id
+    if notification_type == 'winner':
+        notification_dict['from_name'] = 'You'
+    else:
+        notification_dict['from_name'] = from_user.name
+    if from_facebook_user:
+        notification_dict['from_id'] = from_facebook_user.network_id
+    elif from_user:
+        notification_dict['from_id'] = from_user.email
+    notification_dict['bout'] = util.make_bout_dict(bout, notification.user.email)
+    notification_dict['message'] = notification.message
+    return notification_dict
 
 class GetNotificationsHandler(webapp2.RequestHandler):
     @util.login_required
     def get(self):
+        next = self.request.get('next')
         user = util.get_user_from_session()
-        facebook_user = ThirdPartyUser.for_(user, 'FB')
-        notifications = Notification.for_(user)
-        response = []
-        for notification in notifications:
-            notification_type = notification.notification_type
-            bout = notification.bout
-            from_user = User.get_by_key_name(notification.from_user)
-            from_facebook_user = ThirdPartyUser.for_(from_user, 'FB')
-            notification_dict = {}
-            notification_dict['type'] = notification_type
-            notification_dict['timestamp'] = notification.formatted_timestamp
-            if facebook_user:
-                notification_dict['facebook_id'] = facebook_user.network_id
-            if notification_type == 'winner':
-                notification_dict['from_name'] = 'You'
-            else:
-                notification_dict['from_name'] = from_user.name
-            if from_facebook_user:
-                notification_dict['from_id'] = from_facebook_user.network_id
-            elif from_user:
-                notification_dict['from_id'] = from_user.email
-            notification_dict['bout'] = util.make_bout_dict(bout, user.email)
-            notification_dict['message'] = notification.message
-            response.append(notification_dict)
+        #facebook_user = ThirdPartyUser.for_(user, 'FB')
+        response = util.fetch_with_cursor(Notification.all().ancestor(user), limit=2, cursor=next, mapper=make_notification_dict)
         self.response.write(json.dumps(response))
 
 class AddProfilePictureHandler(blobstore_handlers.BlobstoreUploadHandler):
