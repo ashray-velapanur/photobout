@@ -64,7 +64,7 @@ def set_winner(bout):
     if len(participants) > 0 and Vote.count(participants[0]) > 0:
         winner = User.get_by_key_name(participants[0].owner_email)
         Winner.create(winner, bout)
-        Notification.create('winner', winner, 'You', bout)
+        Notification.create('winner', winner, winner.email, bout)
 
 def _user_has_permission(handler):
 	bout_id = long(handler.request.get('bout_id'))

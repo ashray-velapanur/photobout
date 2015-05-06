@@ -139,14 +139,6 @@ class UsersWinsHandler(webapp2.RequestHandler):
 ##clean this up!
 
 class GetNotificationsHandler(webapp2.RequestHandler):
-    def get_from_user(self, user_name):
-        if user_name == 'You':
-            return util.get_user_from_session()
-        users = User.all().fetch(100)
-        for user in users:
-            if user.name == user_name:
-                return user
-
     @util.login_required
     def get(self):
         user = util.get_user_from_session()
@@ -156,7 +148,7 @@ class GetNotificationsHandler(webapp2.RequestHandler):
         for notification in notifications:
             notification_type = notification.notification_type
             bout = notification.bout
-            from_user = self.get_from_user(notification.from_user)
+            from_user = User.get_by_key_name(notification.from_user)
             from_facebook_user = ThirdPartyUser.for_(from_user, 'FB')
             notification_dict = {}
             notification_dict['type'] = notification_type
@@ -164,10 +156,11 @@ class GetNotificationsHandler(webapp2.RequestHandler):
             if facebook_user:
                 notification_dict['facebook_id'] = facebook_user.network_id
             notification_dict['bout'] = util.make_bout_dict(bout, user.email)
-            notification_dict['from_name'] = notification.from_user
             if from_facebook_user:
+                notification_dict['from_name'] = from_user.first_name + ' ' + from_user.last_name
                 notification_dict['from_id'] = from_facebook_user.network_id
             elif from_user:
+                notification_dict['from_name'] = from_user.name
                 notification_dict['from_id'] = from_user.email
             notification_dict['message'] = notification.message
             response.append(notification_dict)

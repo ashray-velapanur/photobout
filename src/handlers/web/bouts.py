@@ -49,7 +49,7 @@ class AddPhotoHandler(blobstore_handlers.BlobstoreUploadHandler):
         image_blob_key = str(self.get_uploads()[0].key())
         bout = Bout.get_by_id(bout_id)
         photo = Photo.create(bout, user, image_blob_key)
-        Notification.create('photo_add', bout.owner, user, bout)
+        Notification.create('photo_add', bout.owner, user.email, bout)
         
     @util.login_required
     def get(self):
@@ -134,7 +134,7 @@ class PhotoVoteHandler(webapp2.RequestHandler):
             response = {"success": False, "error": "Already voted on this Bout."}
         else:
             Vote.create(email, photo)
-            Notification.create('photo_vote', bout.owner, user, bout)
+            Notification.create('photo_vote', bout.owner, user.email, bout)
             response = {"success": True}
         self.response.write(json.dumps(response))
 
@@ -147,7 +147,7 @@ class AddCommentHandler(webapp2.RequestHandler):
         bout_id = long(self.request.get('bout_id'))
         bout = Bout.get_by_id(bout_id)
         Comment.create(user, bout, message)
-        Notification.create('comment_add', bout.owner, user, bout)
+        Notification.create('comment_add', bout.owner, user.email, bout)
 
     def get(self):
         template_values = {}
