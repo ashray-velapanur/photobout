@@ -70,7 +70,7 @@ class GetPhotoHandler(blobstore_handlers.BlobstoreDownloadHandler):
         blob_info = blobstore.BlobInfo.get(blob_key)
         self.send_blob(blob_info)
 
-class GetBoutsHandler(webapp2.RequestHandler):
+class TestHandler(webapp2.RequestHandler):
     def _get_open_bouts(self, email):
         response = []
         for bout in Bout.all().filter('status', 1).order("-created_at"):
@@ -242,7 +242,7 @@ class DeleteInviteHandler(webapp2.RequestHandler):
         if invite:
             invite.delete()
 
-class TestHandler(webapp2.RequestHandler):
+class GetBoutsHandler(webapp2.RequestHandler):
     @util.login_required
     def get(self):
         next = self.request.get('next')
