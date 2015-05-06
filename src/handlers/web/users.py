@@ -167,9 +167,9 @@ class GetNotificationsHandler(webapp2.RequestHandler):
 class AddProfilePictureHandler(blobstore_handlers.BlobstoreUploadHandler):
     @util.login_required
     def post(self):
-        user = util.get_user_from_session()
+        email = util.get_email_from_session()
         image_blob_key = str(self.get_uploads()[0].key())
-        User.update(profile_picture=image_blob_key)
+        User.update(email, profile_picture=image_blob_key)
 
     @util.login_required
     def get(self):
