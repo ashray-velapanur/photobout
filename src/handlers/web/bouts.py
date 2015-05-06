@@ -248,26 +248,12 @@ class TestHandler(webapp2.RequestHandler):
         next = self.request.get('next')
         status = self.request.get('status')
         if status == 'current':
-            response = fetch_with_cursor(Bout.all().filter('status', 1).order("-created_at"), cursor=next, mapper=_get_current_bouts)
+            response = util.fetch_with_cursor(Bout.all().filter('status', 1).order("-created_at"), cursor=next, mapper=_get_current_bouts)
         elif status == 'past':
-            response = fetch_with_cursor(Bout.all().filter('status', 2).order("-created_at"), cursor=next, mapper=_get_past_bouts)
+            response = util.fetch_with_cursor(Bout.all().filter('status', 2).order("-created_at"), cursor=next, mapper=_get_past_bouts)
         else:
-            response = fetch_with_cursor(Bout.all().filter('status', 1).order("-created_at"), cursor=next, mapper=_get_open_bouts)
+            response = util.fetch_with_cursor(Bout.all().filter('status', 1).order("-created_at"), cursor=next, mapper=_get_open_bouts)
         self.response.write(json.dumps(response))
-
-def fetch_with_cursor(query, limit=10, cursor=None, mapper=None):
-    response = {}
-    response['data'] = []
-    if cursor:
-        query.with_cursor(start_cursor=cursor)
-    for count, result in enumerate(query):
-        mapper_response = mapper(result)
-        if mapper_response:
-            response['data'].append(mapper_response)
-            if count >= limit - 1:
-                break
-    response['next'] = None if len(response['data']) < limit else query.cursor()
-    return response
 
 def _get_open_bouts(bout):
     email = util.get_email_from_session()

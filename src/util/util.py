@@ -20,6 +20,20 @@ MAIL_TEMPLATES = {
     }
 }
 
+def fetch_with_cursor(query, limit=10, cursor=None, mapper=None):
+    response = {}
+    response['data'] = []
+    if cursor:
+        query.with_cursor(start_cursor=cursor)
+    for count, result in enumerate(query):
+        mapper_response = mapper(result)
+        if mapper_response:
+            response['data'].append(mapper_response)
+            if count >= limit - 1:
+                break
+    response['next'] = None if len(response['data']) < limit else query.cursor()
+    return response
+
 def send_mail(to, template, **kwargs):
     subject = MAIL_TEMPLATES[template]['subject']
     body = MAIL_TEMPLATES[template]['body'].format(template_values=kwargs)
