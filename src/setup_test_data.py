@@ -6,6 +6,7 @@ from model.bout import Bout
 from model.photo import Photo
 from model.vote import Vote
 from model.comment import Comment
+from model.notification import Notification
 
 def setup():
 	user_1 = User.create('email1', 'firstname1', 'lastname1', 'password1')
@@ -22,5 +23,11 @@ def setup():
 	Vote.create('email1', photo_1)
 	Vote.create('email2', photo_1)
 	Vote.create('email2', photo_2)
+	#photo_add, photo_vote, comment_add, winner, invited
+	Notification.create('photo_add', bout_1.owner, user_2.email, bout_1)
+	Notification.create('photo_vote', bout_1.owner, user_2.email, bout_1)
+	Notification.create('comment_add', bout_1.owner, user_2.email, bout_1)
+	Notification.create('winner', user_1, user_2.email, bout_1)
+	Notification.create('invited', user_1, user_2.email, bout_1)
 	Comment(parent=bout_1, user=user_1, message='message', timestamp=datetime.datetime.now()).put()
 	
