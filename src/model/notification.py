@@ -15,7 +15,7 @@ class Notification(db.Model):
     bout = db.ReferenceProperty(indexed=False)
     from_user = db.StringProperty(indexed=False)
     viewed = db.BooleanProperty(indexed=False)
-    timestamp = db.DateTimeProperty(indexed=False)
+    timestamp = db.DateTimeProperty()
 
     @property
     def user(self):

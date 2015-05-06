@@ -164,7 +164,7 @@ class GetNotificationsHandler(webapp2.RequestHandler):
         next = self.request.get('next')
         user = util.get_user_from_session()
         #facebook_user = ThirdPartyUser.for_(user, 'FB')
-        response = util.fetch_with_cursor(Notification.all().ancestor(user), limit=2, cursor=next, mapper=make_notification_dict)
+        response = util.fetch_with_cursor(Notification.all().ancestor(user).order("-timestamp"), limit=10, cursor=next, mapper=make_notification_dict)
         self.response.write(json.dumps(response))
 
 class AddProfilePictureHandler(blobstore_handlers.BlobstoreUploadHandler):
