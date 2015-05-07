@@ -211,10 +211,14 @@ class AddFollowerHandler(webapp2.RequestHandler):
         follower = util.get_user_from_session()
         following_email = self.request.get('following')
         following = User.get_by_key_name(following_email)
-        if following:
+        if Following.for_(follower, following_email):
+            response = {"success": False, "error": "Already following this user."}
+        elif following:
             Follower.create(follower.email, following)
             Following.create(follower, following_email)
             response = {"success": True}
+        else:
+            response = {"success": False, "error": "User does not exist."}
         self.response.write(json.dumps(response))
 
 class DeleteFollowerHandler(webapp2.RequestHandler):
@@ -235,7 +239,7 @@ class GetFollowingHandler(webapp2.RequestHandler):
     @util.login_required
     def get(self):
         follower = util.get_user_from_session()
-        followings = Following.for_(follower)
+        followings = Following.for_user(follower)
         response = {}
         response['data'] = []
         for following in followings:
@@ -255,7 +259,7 @@ class GetFollowerHandler(webapp2.RequestHandler):
         user = util.get_user_from_session()
         response = {}
         response['data'] = []
-        for follower in Follower.for_(user):
+        for follower in Follower.for_user(user):
             follower_email = follower.email
             follower_user = User.get_by_key_name(follower_email)
             facebook_user = ThirdPartyUser.for_(follower_user, 'FB')
