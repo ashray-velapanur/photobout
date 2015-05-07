@@ -204,7 +204,7 @@ class GetBoutsHandler(webapp2.RequestHandler):
         if bout_id:
             email = util.get_email_from_session()
             bout = Bout.get_by_id(long(bout_id))
-            response = util.make_bout_dict(bout, email)
+            response = [util.make_bout_dict(bout, email)]
         elif status == 'current':
             response = util.fetch_with_cursor(Bout.all().filter('status', 1).order("-created_at"), cursor=next, mapper=_get_current_bouts)
         elif status == 'past':
