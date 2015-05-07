@@ -213,6 +213,20 @@ class AddFollowerHandler(webapp2.RequestHandler):
             Follower.create(follower.email, following)
             Following.create(follower, following_email)
 
+class DeleteFollowerHandler(webapp2.RequestHandler):
+    @util.login_required
+    def post(self):
+        follower_user = util.get_user_from_session()
+        following_email = self.request.get('following')
+        following_user = User.get_by_key_name(following_email)
+        if following_user:
+            follower = Follower.get_by_key_name(follower_user.email, parent=following_user)
+            if follower:
+                follower.delete()
+            following = Following.get_by_key_name(following_email, parent=follower_user)
+            if following:
+                following.delete()
+
 class GetFollowingHandler(webapp2.RequestHandler):
     @util.login_required
     def get(self):
@@ -257,6 +271,7 @@ application = webapp2.WSGIApplication([ ('/users/signup', SignupHandler),
                                         ('/users/profile_picture/get', GetProfilePictureHandler),
                                         ('/users/profile_picture/add_page', AddProfilePicturePageHandler),
                                         ('/users/followers/add', AddFollowerHandler),
+                                        ('/users/followers/delete', DeleteFollowerHandler),
                                         ('/users/following/get', GetFollowingHandler),
                                         ('/users/followers/get', GetFollowerHandler),
                                         ('/users/list', ListUsersHandler),
