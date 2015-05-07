@@ -105,23 +105,25 @@ class AddCommentHandler(webapp2.RequestHandler):
         path = 'templates/add_comment.html'
         self.response.out.write(template.render(path, template_values))
 
+def make_comment_dict(comment):
+    comment_dict = {}
+    facebook_user = ThirdPartyUser.for_(comment.user, 'FB')
+    comment_dict['first_name'] = comment.user.first_name
+    comment_dict['last_name'] = comment.user.last_name
+    comment_dict['message'] = comment.message
+    comment_dict['timestamp'] = comment.timestamp.strftime('%x %X')
+    if facebook_user:
+        comment_dict['facebook_id'] = facebook_user.network_id
+    return comment_dict
+
 class GetCommentsHandler(webapp2.RequestHandler):
     @util.login_required
     @util.bout_permission_required
     def get(self):
+        next = self.request.get('next')
         bout_id = long(self.request.get('bout_id'))
         bout = Bout.get_by_id(bout_id)
-        response = []
-        for comment in Comment.for_(bout):
-            comment_dict = {}
-            facebook_user = ThirdPartyUser.for_(comment.user, 'FB')
-            comment_dict['first_name'] = comment.user.first_name
-            comment_dict['last_name'] = comment.user.last_name
-            comment_dict['message'] = comment.message
-            comment_dict['timestamp'] = comment.timestamp.strftime('%x %X')
-            if facebook_user:
-                comment_dict['facebook_id'] = facebook_user.network_id
-            response.append(comment_dict)
+        response = util.fetch_with_cursor(Comment.all().ancestor(bout).order("-timestamp"), limit=20, cursor=next, mapper=make_comment_dict)
         self.response.write(json.dumps(response))
 
 class LeaderboardHandler(webapp2.RequestHandler):
