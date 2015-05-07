@@ -1,11 +1,10 @@
 from google.appengine.ext import db
 
 class Following(db.model):
-    user = db.ReferenceProperty(indexed=False)
 
     @classmethod
-    def create(cls, follower, following):
-        cls(parent=follower, user=following).put()
+    def create(cls, follower, following_id):
+        cls(parent=follower, key_name=following_id).put()
 
     @classmethod
     def for_(cls, user):
