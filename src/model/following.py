@@ -1,6 +1,6 @@
 from google.appengine.ext import db
 
-class Following(db.model):
+class Following(db.Model):
 
     @classmethod
     def create(cls, follower, following_id):

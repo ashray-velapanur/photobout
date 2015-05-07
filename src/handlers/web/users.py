@@ -16,6 +16,8 @@ from model.winner import Winner
 from model.notification import Notification
 from model.invited import Invited
 from model.third_party_user import ThirdPartyUser
+from model.follower import Follower
+from model.following import Following
 from search_documents.search_documents import UserDocument
 from util import util
 from config import PEPPER
@@ -201,6 +203,17 @@ class UpdateProfileHandler(webapp2.RequestHandler):
         last_name = self.request.get('last_name')
         User.update(user.email, first_name=first_name, last_name=last_name)
 
+class AddFollowerHandler(webapp2.RequestHandler):
+    @util.login_required
+    def get(self):
+        follower = util.get_user_from_session()
+        following_email = self.request.get('following')
+        following = User.get_by_key_name(following_email)
+        if following:
+            Follower.create(follower.email, following)
+            Following.create(follower, following_email)
+
+
 application = webapp2.WSGIApplication([ ('/users/signup', SignupHandler),
                                         ('/users/logout', LogoutHandler),
                                         ('/users/update_profile', UpdateProfileHandler),
@@ -208,6 +221,7 @@ application = webapp2.WSGIApplication([ ('/users/signup', SignupHandler),
                                         ('/users/profile_picture/add', AddProfilePictureHandler),
                                         ('/users/profile_picture/get', GetProfilePictureHandler),
                                         ('/users/profile_picture/add_page', AddProfilePicturePageHandler),
+                                        ('/users/followers/add', AddFollowerHandler),
                                         ('/users/list', ListUsersHandler),
                                         ('/users/bouts', UsersBoutsHandler),
                                         ('/users/wins', UsersWinsHandler),
