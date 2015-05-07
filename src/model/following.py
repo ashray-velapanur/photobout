@@ -9,3 +9,7 @@ class Following(db.Model):
     @classmethod
     def for_(cls, user):
         return cls.all().ancestor(user).fetch(None)
+
+    @property
+    def email(self):
+        return self.key().name()

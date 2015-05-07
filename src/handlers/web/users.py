@@ -231,6 +231,24 @@ class GetFollowingHandler(webapp2.RequestHandler):
             response['users_followed'].append(user_dict)
         self.response.write(json.dumps(response))
 
+class GetFollowerHandler(webapp2.RequestHandler):
+    @util.login_required
+    def get(self):
+        user = util.get_user_from_session()
+        response = {}
+        response['data'] = []
+        for following in Following.for_(user):
+            _dict = {}
+            following_email = following.email
+            following_user = User.get_by_key_name(following_email)
+            facebook_user = ThirdPartyUser.for_(following_user, 'FB')
+            _dict['id'] = following_email
+            _dict['name'] = following_user.name
+            if facebook_user:
+                _dict['facebook_id'] = facebook_user.network_id
+            response['data'].append(_dict)
+        self.response.write(json.dumps(response))
+
 application = webapp2.WSGIApplication([ ('/users/signup', SignupHandler),
                                         ('/users/logout', LogoutHandler),
                                         ('/users/update_profile', UpdateProfileHandler),
@@ -240,6 +258,7 @@ application = webapp2.WSGIApplication([ ('/users/signup', SignupHandler),
                                         ('/users/profile_picture/add_page', AddProfilePicturePageHandler),
                                         ('/users/followers/add', AddFollowerHandler),
                                         ('/users/following/get', GetFollowingHandler),
+                                        ('/users/followers/get', GetFollowerHandler),
                                         ('/users/list', ListUsersHandler),
                                         ('/users/bouts', UsersBoutsHandler),
                                         ('/users/wins', UsersWinsHandler),
