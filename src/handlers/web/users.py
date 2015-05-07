@@ -238,37 +238,43 @@ class DeleteFollowerHandler(webapp2.RequestHandler):
 class GetFollowingHandler(webapp2.RequestHandler):
     @util.login_required
     def get(self):
-        follower = util.get_user_from_session()
-        followings = Following.for_user(follower)
         response = {}
         response['data'] = []
-        for following in followings:
-            user = User.get_by_key_name(following.email)
-            facebook_user = ThirdPartyUser.for_(user, 'FB')
-            user_dict = {}
-            user_dict['name'] = user.name
-            user_dict['id'] = user.email
-            if facebook_user:
-                user_dict['facebook_id'] = facebook_user.network_id
-            response['data'].append(user_dict)
+        follower_email = self.request.get('user_id')
+        if follower_email:
+            follower = User.get_by_key_name(follower_email)
+            if follower:
+                followings = Following.for_user(follower)
+                for following in followings:
+                    user = User.get_by_key_name(following.email)
+                    facebook_user = ThirdPartyUser.for_(user, 'FB')
+                    user_dict = {}
+                    user_dict['name'] = user.name
+                    user_dict['id'] = user.email
+                    if facebook_user:
+                        user_dict['facebook_id'] = facebook_user.network_id
+                    response['data'].append(user_dict)
         self.response.write(json.dumps(response))
 
 class GetFollowerHandler(webapp2.RequestHandler):
     @util.login_required
     def get(self):
-        user = util.get_user_from_session()
         response = {}
         response['data'] = []
-        for follower in Follower.for_user(user):
-            follower_email = follower.email
-            follower_user = User.get_by_key_name(follower_email)
-            facebook_user = ThirdPartyUser.for_(follower_user, 'FB')
-            _dict = {}
-            _dict['id'] = follower_email
-            _dict['name'] = follower_user.name
-            if facebook_user:
-                _dict['facebook_id'] = facebook_user.network_id
-            response['data'].append(_dict)
+        user_email = self.request.get('user_id')
+        if user_email:
+            user = User.get_by_key_name(user_email)
+            if user:
+                for follower in Follower.for_user(user):
+                    follower_email = follower.email
+                    follower_user = User.get_by_key_name(follower_email)
+                    facebook_user = ThirdPartyUser.for_(follower_user, 'FB')
+                    _dict = {}
+                    _dict['id'] = follower_email
+                    _dict['name'] = follower_user.name
+                    if facebook_user:
+                        _dict['facebook_id'] = facebook_user.network_id
+                    response['data'].append(_dict)
         self.response.write(json.dumps(response))
 
 application = webapp2.WSGIApplication([ ('/users/signup', SignupHandler),
