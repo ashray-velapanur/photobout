@@ -126,14 +126,16 @@ class LogoutHandler(webapp2.RequestHandler):
 class UsersBoutsHandler(webapp2.RequestHandler):
     @util.login_required
     def get(self):
-        user = util.get_user_from_session()
+        user_id = self.request.get('user_id')
+        user = User.get_by_key_name(user_id)
         response = [util.make_bout_dict(photo.bout, user.email) for photo in Photo.for_user_(user)]
         self.response.write(json.dumps(response))
 
 class UsersWinsHandler(webapp2.RequestHandler):
     @util.login_required
     def get(self):
-        user = util.get_user_from_session()
+        user_id = self.request.get('user_id')
+        user = User.get_by_key_name(user_id)
         response = [util.make_bout_dict(win.bout, user.email) for win in Winner.for_user(user)]
         self.response.write(json.dumps(response))
 
