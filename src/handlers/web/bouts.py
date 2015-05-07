@@ -111,6 +111,7 @@ def make_comment_dict(comment):
     comment_dict['first_name'] = comment.user.first_name
     comment_dict['last_name'] = comment.user.last_name
     comment_dict['message'] = comment.message
+    comment_dict['id'] = comment.user.email
     comment_dict['timestamp'] = comment.timestamp.strftime('%x %X')
     if facebook_user:
         comment_dict['facebook_id'] = facebook_user.network_id
