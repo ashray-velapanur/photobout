@@ -205,7 +205,7 @@ class UpdateProfileHandler(webapp2.RequestHandler):
 
 class AddFollowerHandler(webapp2.RequestHandler):
     @util.login_required
-    def get(self):
+    def post(self):
         follower = util.get_user_from_session()
         following_email = self.request.get('following')
         following = User.get_by_key_name(following_email)
