@@ -109,7 +109,7 @@ class UsersSearchHandler(webapp2.RequestHandler):
             facebook_user = ThirdPartyUser.for_(User.get_by_key_name(user['id']), 'FB')
             user_dict = {}
             user_dict['name'] = user['fields']['name']
-            user_dict['name'] = user['id']
+            user_dict['id'] = user['id']
             if facebook_user:
                 user_dict['facebook_id'] = facebook_user.network_id
             response['users'].append(user_dict)
