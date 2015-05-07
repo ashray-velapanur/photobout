@@ -214,6 +214,8 @@ class AddFollowerHandler(webapp2.RequestHandler):
         if following:
             Follower.create(follower.email, following)
             Following.create(follower, following_email)
+            response = {"success": True}
+        self.response.write(json.dumps(response))
 
 class DeleteFollowerHandler(webapp2.RequestHandler):
     @util.login_required
