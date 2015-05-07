@@ -219,16 +219,16 @@ class GetFollowingHandler(webapp2.RequestHandler):
         follower = util.get_user_from_session()
         followings = Following.for_(follower)
         response = {}
-        response['users_followed'] = []
+        response['data'] = []
         for following in followings:
-            user = User.get_by_key_name(following.key().name())
+            user = User.get_by_key_name(following.email)
             facebook_user = ThirdPartyUser.for_(user, 'FB')
             user_dict = {}
             user_dict['name'] = user.name
             user_dict['id'] = user.email
             if facebook_user:
                 user_dict['facebook_id'] = facebook_user.network_id
-            response['users_followed'].append(user_dict)
+            response['data'].append(user_dict)
         self.response.write(json.dumps(response))
 
 class GetFollowerHandler(webapp2.RequestHandler):
@@ -238,10 +238,10 @@ class GetFollowerHandler(webapp2.RequestHandler):
         response = {}
         response['data'] = []
         for follower in Follower.for_(user):
-            _dict = {}
             follower_email = follower.email
             follower_user = User.get_by_key_name(follower_email)
             facebook_user = ThirdPartyUser.for_(follower_user, 'FB')
+            _dict = {}
             _dict['id'] = follower_email
             _dict['name'] = follower_user.name
             if facebook_user:
