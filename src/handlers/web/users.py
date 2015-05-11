@@ -148,14 +148,8 @@ def make_notification_dict(notification):
     notification_dict = {}
     notification_dict['type'] = notification_type
     notification_dict['timestamp'] = notification.formatted_timestamp
-    if notification_type == 'winner':
-        notification_dict['from_name'] = 'You'
-    else:
-        notification_dict['from_name'] = from_user.name
-    if from_facebook_user:
-        notification_dict['from_id'] = from_facebook_user.network_id
-    elif from_user:
-        notification_dict['from_id'] = from_user.email
+    notification_dict['profile_picture'] = util.get_profile_picture(from_user)
+    notification_dict['from_name'] = 'You' if notification_type == 'winner' else from_user.name
     notification_dict['bout'] = util.make_bout_dict(bout, notification.user.email)
     notification_dict['message'] = notification.message
     return notification_dict
