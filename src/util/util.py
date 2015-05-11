@@ -1,8 +1,10 @@
 import logging
-
+import json
+    
 from google.appengine.ext import deferred
 from gaesessions import get_current_session
 from google.appengine.api import mail
+from google.appengine.api import urlfetch
 
 from model.vote import Vote
 from model.photo import Photo
@@ -19,6 +21,15 @@ MAIL_TEMPLATES = {
         'body': "Click to reset password: {template_values[reset_link]}"
     }
 }
+
+def get_profile_picture(user):
+    if user.profile_picture:
+        return "/users/profile_picture/get?email=%s"%user.email
+    else:
+        facebook_user = ThirdPartyUser.for_(user, 'FB')
+        if facebook_user:
+            response = json.loads(urlfetch.fetch("http://graph.facebook.com/%s/picture?redirect=false"%facebook_user.network_id).content)
+            return response['data']['url']
 
 def fetch_with_cursor(query, limit=10, cursor=None, mapper=None):
     response = {}
