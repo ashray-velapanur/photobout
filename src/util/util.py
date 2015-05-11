@@ -69,7 +69,7 @@ def make_bout_dict(bout, email):
         photo_dict['owner_last_name'] = owner.last_name
         photo_dict['num_votes'] = Vote.count(photo)
         photo_dict['is_voted'] = Vote.is_voted(email, photo)
-        photo_dict['profile_picture'] = get_profile_picture(user)
+        photo_dict['profile_picture'] = get_profile_picture(owner)
         bout_dict['photos'].append(photo_dict)
     if bout.ended:
         bout_dict['winner'] = ''
