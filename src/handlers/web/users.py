@@ -265,12 +265,20 @@ class GetFollowerHandler(webapp2.RequestHandler):
                     response['data'].append(_dict)
         self.response.write(json.dumps(response))
 
+class GetProfilePictureUrlHandler(webapp2.RequestHandler):
+    @util.login_required
+    def get(self):
+        user = util.get_user_from_session()
+        response = {'profile_picture_url': util.get_profile_picture(user)}
+        self.response.write(json.dumps(response))
+
 application = webapp2.WSGIApplication([ ('/users/signup', SignupHandler),
                                         ('/users/logout', LogoutHandler),
                                         ('/users/update_profile', UpdateProfileHandler),
                                         ('/users/notifications/get', GetNotificationsHandler),
                                         ('/users/profile_picture/add', AddProfilePictureHandler),
                                         ('/users/profile_picture/get', GetProfilePictureHandler),
+                                        ('/users/profile_picture_url', GetProfilePictureUrlHandler),
                                         ('/users/profile_picture/add_page', AddProfilePicturePageHandler),
                                         ('/users/followers/add', AddFollowerHandler),
                                         ('/users/followers/delete', DeleteFollowerHandler),
