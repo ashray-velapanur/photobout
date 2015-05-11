@@ -35,7 +35,8 @@ class User(db.Model):
         if last_name:
             user.last_name = last_name
         if profile_picture:
-            blobstore.delete(user.profile_picture)
+            if user.profile_picture:
+                blobstore.delete(user.profile_picture)
             user.profile_picture = profile_picture
         user.put()
 
