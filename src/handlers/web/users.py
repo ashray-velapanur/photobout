@@ -108,12 +108,11 @@ class UsersSearchHandler(webapp2.RequestHandler):
         response = {}
         response['users'] = []
         for user in results:
-            facebook_user = ThirdPartyUser.for_(User.get_by_key_name(user['id']), 'FB')
+            user_obj = User.get_by_key_name(user['id'])
             user_dict = {}
             user_dict['name'] = user['fields']['name']
             user_dict['id'] = user['id']
-            if facebook_user:
-                user_dict['facebook_id'] = facebook_user.network_id
+            user_dict['profile_picture'] = util.get_profile_picture(user_obj)
             response['users'].append(user_dict)
         self.response.write(json.dumps(response))
 
@@ -144,7 +143,6 @@ def make_notification_dict(notification):
     notification_type = notification.notification_type
     bout = notification.bout
     from_user = User.get_by_key_name(notification.from_user)
-    from_facebook_user = ThirdPartyUser.for_(from_user, 'FB')
     notification_dict = {}
     notification_dict['type'] = notification_type
     notification_dict['timestamp'] = notification.formatted_timestamp
@@ -241,12 +239,10 @@ class GetFollowingHandler(webapp2.RequestHandler):
                 followings = Following.for_user(follower)
                 for following in followings:
                     user = User.get_by_key_name(following.email)
-                    facebook_user = ThirdPartyUser.for_(user, 'FB')
                     user_dict = {}
                     user_dict['name'] = user.name
                     user_dict['id'] = user.email
-                    if facebook_user:
-                        user_dict['facebook_id'] = facebook_user.network_id
+                    user_dict['profile_picture'] = util.get_profile_picture(user)
                     response['data'].append(user_dict)
         self.response.write(json.dumps(response))
 
@@ -262,12 +258,10 @@ class GetFollowerHandler(webapp2.RequestHandler):
                 for follower in Follower.for_user(user):
                     follower_email = follower.email
                     follower_user = User.get_by_key_name(follower_email)
-                    facebook_user = ThirdPartyUser.for_(follower_user, 'FB')
                     _dict = {}
                     _dict['id'] = follower_email
                     _dict['name'] = follower_user.name
-                    if facebook_user:
-                        _dict['facebook_id'] = facebook_user.network_id
+                    _dict['profile_picture'] = util.get_profile_picture(user)
                     response['data'].append(_dict)
         self.response.write(json.dumps(response))
 

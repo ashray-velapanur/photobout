@@ -107,14 +107,12 @@ class AddCommentHandler(webapp2.RequestHandler):
 
 def make_comment_dict(comment):
     comment_dict = {}
-    facebook_user = ThirdPartyUser.for_(comment.user, 'FB')
     comment_dict['first_name'] = comment.user.first_name
     comment_dict['last_name'] = comment.user.last_name
     comment_dict['message'] = comment.message
     comment_dict['id'] = comment.user.email
     comment_dict['timestamp'] = comment.formatted_timestamp
-    if facebook_user:
-        comment_dict['facebook_id'] = facebook_user.network_id
+    comment_dict['profile_picture'] = util.get_profile_picture(comment.user)
     return comment_dict
 
 class GetCommentsHandler(webapp2.RequestHandler):
@@ -137,14 +135,12 @@ class LeaderboardHandler(webapp2.RequestHandler):
         for rank, photo in enumerate(sorted(Photo.for_(bout), key=lambda x: Vote.count(x), reverse=True), start=1):
             user_dict = {}
             owner = User.get_by_key_name(photo.owner_email)
-            facebook_user = ThirdPartyUser.for_(owner, 'FB')
             user_dict['votes'] = Vote.count(photo)
             user_dict['rank'] = rank
             user_dict['email'] = photo.owner_email
             user_dict['first_name'] = owner.first_name
             user_dict['last_name'] = owner.last_name
-            if facebook_user:
-                user_dict['facebook_id'] = facebook_user.network_id
+            user_dict['profile_picture'] = util.get_profile_picture(owner)
             response.append(user_dict)
         self.response.write(json.dumps(response))
 
@@ -172,7 +168,6 @@ class GetInvitesHandler(webapp2.RequestHandler):
     def get(self):
         user = util.get_user_from_session()
         email = user.email
-        facebook_user = ThirdPartyUser.for_(user, 'FB')
         response = []
         for invite in Invited.for_(user):
             invite_dict = {}
@@ -180,8 +175,7 @@ class GetInvitesHandler(webapp2.RequestHandler):
             bout = Bout.get_by_id(bout_id)
             invite_dict['bout'] = util.make_bout_dict(bout, email)
             invite_dict['timestamp'] = invite.timestamp.strftime('%x %X')
-            if facebook_user:
-                invite_dict['facebook_id'] = facebook_user.network_id
+            invite_dict['profile_picture'] = util.get_profile_picture(user)
             invite_dict['invited_by_name'] = invite.invited_by.name
             response.append(invite_dict)
         self.response.write(json.dumps(response))

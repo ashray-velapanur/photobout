@@ -63,15 +63,13 @@ def make_bout_dict(bout, email):
     for photo in sorted(Photo.for_(bout), key=lambda x: Vote.count(x), reverse=True):
         photo_dict = {}
         owner = User.get_by_key_name(photo.owner_email)
-        facebook_user = ThirdPartyUser.for_(owner, 'FB')
         photo_dict['image'] = photo.image_url
         photo_dict['owner_email'] = photo.owner_email
         photo_dict['owner_first_name'] = owner.first_name
         photo_dict['owner_last_name'] = owner.last_name
         photo_dict['num_votes'] = Vote.count(photo)
         photo_dict['is_voted'] = Vote.is_voted(email, photo)
-        if facebook_user:
-            photo_dict['facebook_id'] = facebook_user.network_id
+        photo_dict['profile_picture'] = get_profile_picture(user)
         bout_dict['photos'].append(photo_dict)
     if bout.ended:
         bout_dict['winner'] = ''
