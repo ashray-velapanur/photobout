@@ -261,7 +261,7 @@ class GetFollowerHandler(webapp2.RequestHandler):
                     _dict = {}
                     _dict['id'] = follower_email
                     _dict['name'] = follower_user.name
-                    _dict['profile_picture'] = util.get_profile_picture(user)
+                    _dict['profile_picture'] = util.get_profile_picture(follower_user)
                     response['data'].append(_dict)
         self.response.write(json.dumps(response))
 
