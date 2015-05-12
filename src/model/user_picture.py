@@ -5,14 +5,13 @@ class UserPicture(db.Model):
     blob_key = db.StringProperty(indexed=False)
 
     @classmethod
-    def create(cls, email, blob_key):
-        cls(key_name=email, blob_key=blob_key).put()
-
-    @classmethod
-    def update(cls, email, blob_key):
+    def create_or_update(cls, email, blob_key):
         user_picture = cls.for_(email)
+        if not user_picture:
+            user_picture = cls(key_name=email)
         old_blob_key = user_picture.blob_key
-        blobstore.delete(old_blob_key)
+        if old_blob_key:
+            blobstore.delete(old_blob_key)
         user_picture.blob_key = blob_key
         user_picture.put()
 

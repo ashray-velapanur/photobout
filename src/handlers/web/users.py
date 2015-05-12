@@ -173,11 +173,7 @@ class AddProfilePictureHandler(blobstore_handlers.BlobstoreUploadHandler):
     def post(self):
         email = util.get_email_from_session()
         image_blob_key = str(self.get_uploads()[0].key())
-        user_picture = UserPicture.for_(email)
-        if not user_picture:
-            UserPicture.create(email, image_blob_key)
-        else:
-            UserPicture.update(email, image_blob_key)
+        UserPicture.create_or_update(email, image_blob_key)
         profile_picture = '/users/profile_picture/get?email=%s'%email
         User.update(email, profile_picture=profile_picture)
 
@@ -190,7 +186,7 @@ class GetProfilePictureHandler(blobstore_handlers.BlobstoreDownloadHandler):
     @util.login_required
     def get(self):
         email = self.request.get('email')
-        user_picture = UserPicture.get_by_key_name(email)
+        user_picture = UserPicture.for_(email)
         blob_key = user_picture.blob_key
         if blob_key:
             blob_info = blobstore.BlobInfo.get(blob_key)
