@@ -11,6 +11,7 @@ from google.appengine.ext.webapp import blobstore_handlers
 from google.appengine.ext import blobstore
 
 from model.user import User
+from model.user_picture import UserPicture
 from model.photo import Photo
 from model.winner import Winner
 from model.notification import Notification
@@ -57,6 +58,10 @@ class LoginHandler(webapp2.RequestHandler):
             response = {"success": False, "error": "The email or password you entered is incorrect."}
         return response
 
+    def get_profile_picture(self, id):
+        response = json.loads(urlfetch.fetch("http://graph.facebook.com/%s/picture?redirect=false"%id).content)
+        return response['data']['url']
+
     def handle_facebook_login(self):
         access_token = self.request.get('access_token')
         user_id = self.request.get('user_id')
@@ -71,6 +76,8 @@ class LoginHandler(webapp2.RequestHandler):
             if not user:
                 user = User.create(email, profile['first_name'], profile['last_name'])
             ThirdPartyUser.create('FB', user, access_token, id)
+            profile_picture = self.get_profile_picture(id)
+            User.update(email, profile_picture=profile_picture)
             util.set_session(email)
             response = {"success": True, "email": email, "first_name": user.first_name, "last_name": user.last_name}
         return response
@@ -166,7 +173,9 @@ class AddProfilePictureHandler(blobstore_handlers.BlobstoreUploadHandler):
     def post(self):
         email = util.get_email_from_session()
         image_blob_key = str(self.get_uploads()[0].key())
-        User.update(email, profile_picture=image_blob_key)
+        UserPicture.create(email, image_blob_key)
+        profile_picture = '/users/profile_picture/get?email=%s'%email
+        User.update(email, profile_picture=profile_picture)
 
     @util.login_required
     def get(self):
@@ -177,8 +186,8 @@ class GetProfilePictureHandler(blobstore_handlers.BlobstoreDownloadHandler):
     @util.login_required
     def get(self):
         email = self.request.get('email')
-        user = User.get_by_key_name(email)
-        blob_key = user.profile_picture
+        user_picture = UserPicture.get_by_key_name(email)
+        blob_key = user_picture.blob_key
         if blob_key:
             blob_info = blobstore.BlobInfo.get(blob_key)
             self.send_blob(blob_info)
