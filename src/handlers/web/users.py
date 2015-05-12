@@ -119,7 +119,7 @@ class UsersSearchHandler(webapp2.RequestHandler):
             user_dict = {}
             user_dict['name'] = user['fields']['name']
             user_dict['id'] = user['id']
-            user_dict['profile_picture'] = util.get_profile_picture(user_obj)
+            user_dict['profile_picture'] = user_obj.profile_picture
             response['users'].append(user_dict)
         self.response.write(json.dumps(response))
 
@@ -154,7 +154,7 @@ def make_notification_dict(notification):
     notification_dict = {}
     notification_dict['type'] = notification_type
     notification_dict['timestamp'] = notification.formatted_timestamp
-    notification_dict['profile_picture'] = util.get_profile_picture(from_user)
+    notification_dict['profile_picture'] = from_user.profile_picture
     notification_dict['from_name'] = 'You' if notification_type == 'winner' else from_user.name
     notification_dict['bout'] = util.make_bout_dict(bout, notification.user.email)
     notification_dict['message'] = notification.message
@@ -173,7 +173,11 @@ class AddProfilePictureHandler(blobstore_handlers.BlobstoreUploadHandler):
     def post(self):
         email = util.get_email_from_session()
         image_blob_key = str(self.get_uploads()[0].key())
-        UserPicture.create(email, image_blob_key)
+        user_picture = UserPicture.for_(email)
+        if not user_picture:
+            UserPicture.create(email, image_blob_key)
+        else:
+            UserPicture.update(email, image_blob_key)
         profile_picture = '/users/profile_picture/get?email=%s'%email
         User.update(email, profile_picture=profile_picture)
 
@@ -252,7 +256,7 @@ class GetFollowingHandler(webapp2.RequestHandler):
                     user_dict = {}
                     user_dict['name'] = user.name
                     user_dict['id'] = user.email
-                    user_dict['profile_picture'] = util.get_profile_picture(user)
+                    user_dict['profile_picture'] = user.profile_picture
                     response['data'].append(user_dict)
         self.response.write(json.dumps(response))
 
@@ -271,7 +275,7 @@ class GetFollowerHandler(webapp2.RequestHandler):
                     _dict = {}
                     _dict['id'] = follower_email
                     _dict['name'] = follower_user.name
-                    _dict['profile_picture'] = util.get_profile_picture(follower_user)
+                    _dict['profile_picture'] = follower_user.profile_picture
                     response['data'].append(_dict)
         self.response.write(json.dumps(response))
 
@@ -279,7 +283,7 @@ class GetProfilePictureUrlHandler(webapp2.RequestHandler):
     @util.login_required
     def get(self):
         user = util.get_user_from_session()
-        response = {'profile_picture_url': util.get_profile_picture(user)}
+        response = {'profile_picture_url': user.profile_picture}
         self.response.write(json.dumps(response))
 
 application = webapp2.WSGIApplication([ ('/users/signup', SignupHandler),

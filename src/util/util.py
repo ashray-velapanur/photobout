@@ -23,15 +23,6 @@ MAIL_TEMPLATES = {
     }
 }
 
-def get_profile_picture(user):
-    if user.profile_picture:
-        return "/users/profile_picture/get?email=%s"%user.email
-    else:
-        facebook_user = ThirdPartyUser.for_(user, 'FB')
-        if facebook_user:
-            response = json.loads(urlfetch.fetch("http://graph.facebook.com/%s/picture?redirect=false"%facebook_user.network_id).content)
-            return response['data']['url']
-
 def fetch_with_cursor(query, limit=10, cursor=None, mapper=None):
     response = {}
     response['data'] = []
@@ -70,7 +61,7 @@ def make_bout_dict(bout, email):
         photo_dict['owner_last_name'] = owner.last_name
         photo_dict['num_votes'] = Vote.count(photo)
         photo_dict['is_voted'] = Vote.is_voted(email, photo)
-        photo_dict['profile_picture'] = get_profile_picture(owner)
+        photo_dict['profile_picture'] = owner.profile_picture
         bout_dict['photos'].append(photo_dict)
     if bout.ended:
         bout_dict['winner'] = ''

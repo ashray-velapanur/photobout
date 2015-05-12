@@ -110,7 +110,7 @@ def make_comment_dict(comment):
     comment_dict['message'] = comment.message
     comment_dict['id'] = comment.user.email
     comment_dict['timestamp'] = comment.formatted_timestamp
-    comment_dict['profile_picture'] = util.get_profile_picture(comment.user)
+    comment_dict['profile_picture'] = comment.user.profile_picture
     return comment_dict
 
 class GetCommentsHandler(webapp2.RequestHandler):
@@ -136,7 +136,7 @@ class LeaderboardHandler(webapp2.RequestHandler):
             user_dict['email'] = photo.owner_email
             user_dict['first_name'] = owner.first_name
             user_dict['last_name'] = owner.last_name
-            user_dict['profile_picture'] = util.get_profile_picture(owner)
+            user_dict['profile_picture'] = owner.profile_picture
             response.append(user_dict)
         self.response.write(json.dumps(response))
 
@@ -169,7 +169,7 @@ class GetInvitesHandler(webapp2.RequestHandler):
             bout = Bout.get_by_id(bout_id)
             invite_dict['bout'] = util.make_bout_dict(bout, email)
             invite_dict['timestamp'] = invite.timestamp.strftime('%x %X')
-            invite_dict['profile_picture'] = util.get_profile_picture(user)
+            invite_dict['profile_picture'] = user.profile_picture
             invite_dict['invited_by_name'] = invite.invited_by.name
             response.append(invite_dict)
         self.response.write(json.dumps(response))
