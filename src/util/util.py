@@ -51,6 +51,7 @@ def make_bout_dict(bout, email):
     bout_dict['time_left'] = bout.time_left_string
     bout_dict['ended'] = bout.ended
     bout_dict['num_comments'] = len(Comment.for_(bout))
+    bout_dict['can_join'] = True if bout.permission == 1 or Following.for_(bout.owner, email) or bout.owner.email == email else False
     bout_dict['photos'] = []
     for photo in sorted(Photo.for_(bout), key=lambda x: Vote.count(x), reverse=True):
         photo_dict = {}
