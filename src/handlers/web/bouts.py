@@ -64,7 +64,6 @@ class AddPhotoPageHandler(webapp2.RequestHandler):
         self.response.out.write(template.render(path, template_values))
 
 class GetPhotoHandler(blobstore_handlers.BlobstoreDownloadHandler):
-    @util.login_required
     def get(self):
         blob_key = self.request.get('blob_key')
         blob_info = blobstore.BlobInfo.get(blob_key)
