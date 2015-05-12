@@ -210,23 +210,14 @@ class GetBoutsHandler(webapp2.RequestHandler):
 
 def _get_open_bouts(bout):
     email = util.get_email_from_session()
-    if bout.permission == 2:
-        if bout.owner.email != email:
-            return
     return util.make_bout_dict(bout, email)
 
 def _get_past_bouts(bout):
     email = util.get_email_from_session()
-    if bout.permission == 2:
-        if bout.owner.email != email:
-            return
     return util.make_bout_dict(bout, email)
 
 def _get_current_bouts(bout):
     email = util.get_email_from_session()
-    if bout.permission == 2:
-        if bout.owner.email != email:
-            return
     if not Photo.get_by_key_name(email, parent=bout):
         return
     return util.make_bout_dict(bout, email)
@@ -247,8 +238,15 @@ class BoutSearchHandler(webapp2.RequestHandler):
                     response.append(util.make_bout_dict(bout, email))
         self.response.write(json.dumps(response))
 
+class TestHandler(webapp2.RequestHandler):
+    @util.login_required
+    @util.bout_permission_required
+    def get(self):
+        self.response.write('... wrkign')
+
 application = webapp2.WSGIApplication([ ('/bouts/create', CreateBoutHandler),
                                         ('/bouts/get', GetBoutsHandler),
+                                        ('/bouts/test', TestHandler),
                                         ('/bouts/search', BoutSearchHandler),
                                         ('/bouts/leaderboard', LeaderboardHandler),
                                         ('/bouts/photos/add', AddPhotoHandler),

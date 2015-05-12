@@ -12,6 +12,7 @@ from model.user import User
 from model.winner import Winner
 from model.bout import Bout
 from model.comment import Comment
+from model.following import Following
 from model.notification import Notification
 from model.third_party_user import ThirdPartyUser
 
@@ -90,22 +91,23 @@ def set_winner(bout):
         Notification.create('winner', winner, winner.email, bout)
 
 def _user_has_permission(handler):
-	bout_id = long(handler.request.get('bout_id'))
-	bout = Bout.get_by_id(bout_id)
-	if not bout:
-		logging.info('... invalid bout id')
-		return False
-	if bout.permission == 1:
-		logging.info('... public bout')
-		return True
-	user = get_user_from_session()
-	if bout.owner.email == user.email:
-		logging.info('... is owner')
-		return True
-	if Photo.get_by_key_name(user.email, parent=bout):
-		logging.info('... is participant')
-		return True
-	return False
+    bout_id = long(handler.request.get('bout_id'))
+    bout = Bout.get_by_id(bout_id)
+    if not bout:
+        logging.info('... invalid bout id')
+        return False
+    if bout.permission == 1:
+        logging.info('... public bout')
+        return True
+    email = get_email_from_session()
+    if bout.owner.email == email:
+        logging.info('... is owner')
+        return True
+    if Following.for_(bout.owner, email):
+        logging.info('... following')
+        return True
+    logging.info('... no permission')
+    return False
 
 def bout_permission_required(fn):
     def check_permission(self, *args):
@@ -114,8 +116,8 @@ def bout_permission_required(fn):
     return check_permission
 
 def get_user_from_session():
-	session = get_current_session()
-	return User.get_by_key_name(session['email']) if 'email' in session else None
+    session = get_current_session()
+    return User.get_by_key_name(session['email']) if 'email' in session else None
 
 def get_email_from_session():
     session = get_current_session()
@@ -129,7 +131,7 @@ def _user_logged_in(handler):
     session = get_current_session()
     if session.is_active() and 'email' in session:
         if User.get_by_key_name(session['email']):
-	        return True
+            return True
         session.terminate()
     return False
 
