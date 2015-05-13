@@ -43,7 +43,7 @@ def send_mail(to, template, **kwargs):
     sender = "support@b-eagles.com"
     mail.send_mail(sender=sender, to=to, subject=subject, body=body)
 
-def make_bout_dict(bout, email):
+def make_bout_dict(bout, email, is_users_bouts=False):
     bout_dict = {}
     bout_dict['id'] = bout.id
     bout_dict['name'] = bout.name
@@ -51,7 +51,7 @@ def make_bout_dict(bout, email):
     bout_dict['time_left'] = bout.time_left_string
     bout_dict['ended'] = bout.ended
     bout_dict['num_comments'] = len(Comment.for_(bout))
-    bout_dict['can_join'] = True if bout.permission == 1 or Following.for_(bout.owner, email) or bout.owner.email == email else False
+    bout_dict['can_join'] = True if bout.permission == 1 or Following.for_(bout.owner, email) or bout.owner.email == (get_email_from_session() if is_users_bouts else email) else False
     bout_dict['photos'] = []
     for photo in sorted(Photo.for_(bout), key=lambda x: Vote.count(x), reverse=True):
         photo_dict = {}
