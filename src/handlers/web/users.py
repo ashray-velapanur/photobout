@@ -116,11 +116,12 @@ class UsersSearchHandler(webapp2.RequestHandler):
         response['users'] = []
         for user in results:
             user_obj = User.get_by_key_name(user['id'])
-            user_dict = {}
-            user_dict['name'] = user['fields']['name']
-            user_dict['id'] = user['id']
-            user_dict['profile_picture'] = user_obj.profile_picture
-            response['users'].append(user_dict)
+            if user_obj:
+                user_dict = {}
+                user_dict['name'] = user['fields']['name']
+                user_dict['id'] = user['id']
+                user_dict['profile_picture'] = user_obj.profile_picture
+                response['users'].append(user_dict)
         self.response.write(json.dumps(response))
 
 class LogoutHandler(webapp2.RequestHandler):

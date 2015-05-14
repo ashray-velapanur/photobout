@@ -228,7 +228,8 @@ class BoutSearchHandler(webapp2.RequestHandler):
                 bout_id = str(result['id'])
                 if bout_id and len(bout_id) > 0:
                     bout = Bout.get_by_id(long(bout_id))
-                    response.append(util.make_bout_dict(bout, email))
+                    if bout:
+                        response.append(util.make_bout_dict(bout, email))
         self.response.write(json.dumps(response))
 
 class TestHandler(webapp2.RequestHandler):
