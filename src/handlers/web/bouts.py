@@ -83,12 +83,15 @@ class PhotoVoteHandler(webapp2.RequestHandler):
         if not vote:
             Vote.create(email, photo)
             Notification.create('photo_vote', bout.owner, user.email, bout)
+            response = {"success": True, "voted": True}
         else:
             vote.delete()
+            response = {"success": True, "voted": False}
             if vote.photo.owner_email != owner_email:
                 Vote.create(email, photo)
+                response = {"success": True, "voted": True}
         vote_count = Vote.count(photo)
-        response = {"success": True, "vote_count": vote_count}
+        response["vote_count"] = vote_count
         self.response.write(json.dumps(response))
 
 class AddCommentHandler(webapp2.RequestHandler):
