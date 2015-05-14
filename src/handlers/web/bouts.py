@@ -79,17 +79,11 @@ class PhotoVoteHandler(webapp2.RequestHandler):
         bout_id = long(self.request.get('bout_id'))
         bout = Bout.get_by_id(bout_id)
         photo = Photo.get_by_key_name(owner_email, parent=bout)
-        vote = Vote.for_(email, bout)
-        if not vote:
-            Vote.create(email, photo)
+        if Vote.update(email, photo, bout):
             Notification.create('photo_vote', bout.owner, user.email, bout)
             response = {"success": True, "voted": True}
         else:
-            vote.delete()
             response = {"success": True, "voted": False}
-            if vote.photo.owner_email != owner_email:
-                Vote.create(email, photo)
-                response = {"success": True, "voted": True}
         vote_count = Vote.count(photo)
         response["vote_count"] = vote_count
         self.response.write(json.dumps(response))

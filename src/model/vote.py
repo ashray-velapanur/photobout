@@ -9,8 +9,19 @@ class Vote(db.Model):
     def create(cls, email, photo):
         cls(key_name=email, parent=photo.bout, photo=photo).put()
 
-    def delete(self):
-        db.delete(self)
+    @classmethod
+    def update(cls, email, photo, bout):
+        vote = cls.for_(email, bout)
+        if vote:
+            if vote.photo.owner_email != photo.owner_email:
+                vote.photo = photo
+                vote.put()
+                return True
+            db.delete(vote)
+            return False
+        else:
+            cls.create(email, photo)
+            return True
 
     @classmethod
     def for_(cls, email, bout):
