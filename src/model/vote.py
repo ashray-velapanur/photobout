@@ -9,6 +9,9 @@ class Vote(db.Model):
     def create(cls, email, photo):
         cls(key_name=email, parent=photo.bout, photo=photo).put()
 
+    def delete(self):
+        db.delete(self)
+
     @classmethod
     def for_(cls, email, bout):
         return cls.get_by_key_name(email, parent=bout)

@@ -79,12 +79,14 @@ class PhotoVoteHandler(webapp2.RequestHandler):
         bout_id = long(self.request.get('bout_id'))
         bout = Bout.get_by_id(bout_id)
         photo = Photo.get_by_key_name(owner_email, parent=bout)
-        if Vote.for_(email, bout):
-            response = {"success": False, "error": "Already voted on this Bout."}
-        else:
+        vote = Vote.for_(email, bout)
+        if not vote:
             Vote.create(email, photo)
             Notification.create('photo_vote', bout.owner, user.email, bout)
-            response = {"success": True}
+        else:
+            vote.delete()
+        vote_count = Vote.count(photo)
+        response = {"success": True, "vote_count": vote_count}
         self.response.write(json.dumps(response))
 
 class AddCommentHandler(webapp2.RequestHandler):
