@@ -65,10 +65,11 @@ def make_bout_dict(bout, email, is_users_bouts=False):
         photo_dict['profile_picture'] = owner.profile_picture
         bout_dict['photos'].append(photo_dict)
     if bout.ended:
-        bout_dict['winner'] = ''
-        winner = Winner.for_bout(bout)
-        if winner:
-            bout_dict['winner'] = winner.user.email
+        bout_dict['winners'] = []
+        winners = Winner.for_bout(bout)
+        if len(winners) > 0:
+            for winner in winners:
+                bout_dict['winners'].append(winner.email)
     return bout_dict
 
 def schedule_end(bout):
@@ -77,10 +78,17 @@ def schedule_end(bout):
 def set_winner(bout):
     bout.change_status(2)
     participants = sorted(Photo.for_(bout), key=lambda x: Vote.count(x), reverse=True)
-    if len(participants) > 0 and Vote.count(participants[0]) > 0:
-        winner = User.get_by_key_name(participants[0].owner_email)
-        Winner.create(winner, bout)
-        Notification.create('winner', winner, winner.email, bout)
+    if len(participants) > 0:
+        max_vote_count = Vote.count(participants[0])
+        if max_vote_count > 0:
+            for participant in participants:
+                current_vote_count = Vote.count(participant)
+                if current_vote_count == max_vote_count:
+                    winner = User.get_by_key_name(participant.owner_email)
+                    Winner.create(winner, bout)
+                    Notification.create('winner', winner, winner.email, bout)
+                elif current_vote_count < max_vote_count:
+                    break
 
 def _user_has_permission(handler):
     bout_id = long(handler.request.get('bout_id'))
