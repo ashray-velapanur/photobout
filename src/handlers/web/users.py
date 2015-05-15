@@ -137,15 +137,11 @@ class LogoutHandler(webapp2.RequestHandler):
 class UsersBoutsHandler(webapp2.RequestHandler):
     @util.login_required
     def get(self):
-        next = self.request.get('next')
         user_id = self.request.get('user_id')
         user = User.get_by_key_name(user_id)
-        response = util.fetch_with_cursor(Photo.all().filter('user', user), limit=20, cursor=next, mapper=_get_bouts)
+        photos = Photo.all().filter('user', user).fetch(20)
+        response = [util.make_bout_dict(photo.bout, user.email, is_users_bouts=True) for photo in photos]
         self.response.write(json.dumps(response))
-
-def _get_bouts(photo):
-    email = util.get_email_from_session()
-    return util.make_bout_dict(photo.bout, email)
 
 class UsersWinsHandler(webapp2.RequestHandler):
     @util.login_required
