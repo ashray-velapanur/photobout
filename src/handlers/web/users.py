@@ -36,7 +36,7 @@ class SignupHandler(webapp2.RequestHandler):
             if user:
                 response = {"success": False, "error": "Email already in use."}
             else:
-                User.create(email, first_name, last_name, token_hex, password)
+                User.create(email, first_name, last_name, device_token, password)
                 util.set_session(email)
                 response = {"success": True}
         else:
@@ -53,6 +53,7 @@ class LoginHandler(webapp2.RequestHandler):
         password = self.request.get('password')
         user = User.get_by_key_name(email)
         if user and self.check_password(email, password):
+            User.update(email, device_token=device_token)
             util.set_session(email)
             response = {"success": True, "email": email, "first_name": user.first_name, "last_name": user.last_name}
         else:
@@ -79,7 +80,7 @@ class LoginHandler(webapp2.RequestHandler):
                 user = User.create(email, profile['first_name'], profile['last_name'], device_token)
             ThirdPartyUser.create('FB', user, access_token, id)
             profile_picture = self.get_profile_picture(id)
-            User.update(email, profile_picture=profile_picture)
+            User.update(email, profile_picture=profile_picture, device_token=device_token)
             util.set_session(email)
             response = {"success": True, "email": email, "first_name": user.first_name, "last_name": user.last_name}
         return response
