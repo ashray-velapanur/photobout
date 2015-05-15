@@ -16,6 +16,15 @@ handlers:
 - url: /bouts/.*
   script: handlers.web.bouts.application
 
+- url: /temp/.*
+  script: handlers.web.temp.application
+
+- url: /assets/certs
+  static_dir: assets/certs
+
 libraries:
 - name: django
   version: "1.4"
+
+- name: ssl
+  version: latest
