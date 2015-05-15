@@ -81,7 +81,8 @@ class PhotoVoteHandler(webapp2.RequestHandler):
         photo = Photo.get_by_key_name(owner_email, parent=bout)
         if Vote.update(email, photo, bout):
             Notification.create('photo_vote', bout.owner, user.email, bout)
-            util.send_push_notification(photo.user.device_token, 'Someone voted on your photo!')
+            message = "%s voted on your photo in the Bout %s."%(user.name, bout.name)
+            util.send_push_notification(photo.user.device_token, message)
             response = {"success": True, "voted": True}
         else:
             response = {"success": True, "voted": False}

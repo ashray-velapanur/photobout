@@ -26,9 +26,12 @@ MAIL_TEMPLATES = {
 }
 
 def send_push_notification(device_token, message):
-    apns = APNs(use_sandbox=True, cert_file='PhotoboutCert.pem', key_file='PhotoboutKeyNoEnc.pem')
-    payload = Payload(alert=message, sound="default", badge=1)
-    apns.gateway_server.send_notification(device_token, payload)
+    if device_token:
+        apns = APNs(use_sandbox=True, cert_file='PhotoboutCert.pem', key_file='PhotoboutKeyNoEnc.pem')
+        payload = Payload(alert=message, sound="default", badge=1)
+        logging.info('... sending notification')
+        logging.info(device_token)
+        apns.gateway_server.send_notification(device_token, payload)
 
 def fetch_with_cursor(query, limit=10, cursor=None, mapper=None):
     response = {}

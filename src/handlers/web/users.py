@@ -230,6 +230,9 @@ class AddFollowerHandler(webapp2.RequestHandler):
         elif following:
             Follower.create(follower.email, following)
             Following.create(follower, following_email)
+            logging.info(following.email)
+            message = "%s is following you."%follower.email
+            util.send_push_notification(following.device_token, message)
             response = {"success": True}
         else:
             response = {"success": False, "error": "User does not exist."}
