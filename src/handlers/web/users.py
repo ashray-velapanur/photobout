@@ -52,6 +52,7 @@ class LoginHandler(webapp2.RequestHandler):
         email = self.request.get('email')
         password = self.request.get('password')
         user = User.get_by_key_name(email)
+        device_token = self.request.get('token_hex')
         if user and self.check_password(email, password):
             User.update(email, device_token=device_token)
             util.set_session(email)

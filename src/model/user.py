@@ -29,7 +29,7 @@ class User(db.Model):
         return user
 
     @classmethod
-    def update(cls, email, first_name=None, last_name=None, profile_picture=None):
+    def update(cls, email, first_name=None, last_name=None, device_token=device_token, profile_picture=None):
         user = cls.get_by_key_name(email)
         if first_name:
             user.first_name = first_name
@@ -37,6 +37,8 @@ class User(db.Model):
             user.last_name = last_name
         if profile_picture:
             user.profile_picture = profile_picture
+        if device_token:
+            user.device_token = device_token
         user.put()
 
     @property
