@@ -283,6 +283,20 @@ class GetFollowerHandler(webapp2.RequestHandler):
                     response['data'].append(_dict)
         self.response.write(json.dumps(response))
 
+class IsFollowingHandler(webapp2.RequestHandler):
+    @util.login_required
+    def get(self):
+        response = {}
+        response['data'] = {}
+        user_email = self.request.get('user_id')
+        if user_email:
+            user = User.get_by_key_name(user_email)
+            if user:
+                current_user = util.get_user_from_session()
+                if current_user:
+                    response['data']['is_following'] = Following.is_following(current_user, user_email)
+        self.response.write(json.dumps(response))
+
 class GetProfilePictureUrlHandler(webapp2.RequestHandler):
     @util.login_required
     def get(self):
@@ -302,6 +316,7 @@ application = webapp2.WSGIApplication([ ('/users/signup', SignupHandler),
                                         ('/users/followers/delete', DeleteFollowerHandler),
                                         ('/users/following/get', GetFollowingHandler),
                                         ('/users/followers/get', GetFollowerHandler),
+                                        ('/users/is_following_user', IsFollowingHandler),
                                         ('/users/list', ListUsersHandler),
                                         ('/users/bouts', UsersBoutsHandler),
                                         ('/users/wins', UsersWinsHandler),
