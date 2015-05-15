@@ -16,12 +16,19 @@ from model.following import Following
 from model.notification import Notification
 from model.third_party_user import ThirdPartyUser
 
+from PyAPNs.apns import APNs, Frame, Payload
+
 MAIL_TEMPLATES = {
     'forgot_password': {
         'subject': 'Password Reset',
         'body': "Click to reset password: {template_values[reset_link]}"
     }
 }
+
+def send_push_notification(device_token, message):
+    apns = APNs(use_sandbox=True, cert_file='PhotoboutCert.pem', key_file='PhotoboutKeyNoEnc.pem')
+    payload = Payload(alert=message, sound="default", badge=1)
+    apns.gateway_server.send_notification(device_token, payload)
 
 def fetch_with_cursor(query, limit=10, cursor=None, mapper=None):
     response = {}
