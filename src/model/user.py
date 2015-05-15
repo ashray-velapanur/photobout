@@ -12,17 +12,18 @@ class User(db.Model):
     last_name = db.StringProperty(indexed=False)
     password = db.StringProperty(indexed=False)
     profile_picture = db.StringProperty(indexed=False)
+    device_token = db.StringProperty(indexed=False)
 
     @property
     def name(self):
         return "%s %s"%(self.first_name, self.last_name)
 
     @classmethod
-    def create(cls, email, first_name, last_name, password=None):
+    def create(cls, email, first_name, last_name, device_token, password=None):
         if not password:
             password = 'makethisrandom'
         password_hash = generate_password_hash(password, pepper=PEPPER)
-        user = cls(key_name=email, first_name=first_name, last_name=last_name, password=password_hash)
+        user = cls(key_name=email, first_name=first_name, last_name=last_name, device_token=device_token, password=password_hash)
         UserDocument().create(email, name="%s %s"%(first_name, last_name))
         user.put()
         return user
