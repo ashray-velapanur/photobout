@@ -27,7 +27,7 @@ MAIL_TEMPLATES = {
 
 def send_push_notification(device_token, message):
     if device_token:
-        apns = APNs(use_sandbox=True, cert_file='PhotoboutProdCert.pem', key_file='PhotoboutProdKeyNoEnc.pem')
+        apns = APNs(use_sandbox=False, cert_file='PhotoboutProdCert.pem', key_file='PhotoboutProdKeyNoEnc.pem')
         payload = Payload(alert=message, sound="default", badge=1)
         logging.info('... sending notification')
         logging.info(device_token)

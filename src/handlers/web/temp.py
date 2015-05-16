@@ -5,9 +5,9 @@ from PyAPNs.apns import APNs, Frame, Payload
 
 class NotifHandler(webapp2.RequestHandler):
     def get(self):
-        apns = APNs(use_sandbox=True, cert_file='PhotoboutProdCert.pem', key_file='PhotoboutProdKeyNoEnc.pem')
+        apns = APNs(use_sandbox=False, cert_file='PhotoboutProdCert.pem', key_file='PhotoboutProdKeyNoEnc.pem')
         logging.info('Instantiated APNs')
-        token_hex = '45dc5c69e9a647e426ffd2751124fa68f35fe77b9a731f02bc538aea393a0185'
+        token_hex = 'a79449feaa2668545a43f128e531ffa63454007942b8002888ee9bf1d739c7a5'
         payload = Payload(alert="asdasd Hello World!", sound="default", badge=1)
         apns.gateway_server.send_notification(token_hex, payload)
         logging.info('... feedback_server')
