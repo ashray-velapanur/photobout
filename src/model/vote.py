@@ -28,6 +28,10 @@ class Vote(db.Model):
         return cls.get_by_key_name(email, parent=bout)
 
     @classmethod
+    def for_photo(cls, photo):
+        return cls.all().ancestor(photo.bout).filter('photo', photo).fetch(None)
+
+    @classmethod
     def count(cls, photo):
         return cls.all().ancestor(photo.bout).filter('photo', photo).count()
 

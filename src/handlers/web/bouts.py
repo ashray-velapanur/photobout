@@ -4,7 +4,7 @@ import logging
 import datetime
 
 from gaesessions import get_current_session
-
+from google.appengine.ext import db
 from google.appengine.ext import blobstore
 from google.appengine.ext.webapp import template
 from google.appengine.ext.webapp import blobstore_handlers
@@ -52,7 +52,12 @@ class AddPhotoHandler(blobstore_handlers.BlobstoreUploadHandler):
         bout_id = long(self.request.get('bout_id'))
         image_blob_key = str(self.get_uploads()[0].key())
         bout = Bout.get_by_id(bout_id)
-        photo = Photo.create(bout, user, image_blob_key)
+        photo = Photo.for_bout_user(bout, user)
+        if photo:
+            votes = Vote.for_photo(photo)
+            if len(votes) > 0:
+                db.delete(votes)
+        Photo.create(bout, user, image_blob_key)
         Notification.create('photo_add', bout.owner, user.email, bout)
         
     @util.login_required
