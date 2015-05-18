@@ -131,6 +131,9 @@ class UsersSearchHandler(webapp2.RequestHandler):
 class LogoutHandler(webapp2.RequestHandler):
     @util.login_required
     def post(self):
+        user = util.get_user_from_session()
+        user.device_token = None
+        user.put()
         session = get_current_session()
         session.terminate()
 
