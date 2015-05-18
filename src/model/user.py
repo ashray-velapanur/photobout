@@ -39,6 +39,8 @@ class User(db.Model):
             user.profile_picture = profile_picture
         if device_token:
             user.device_token = device_token
+        if first_name or last_name:
+            UserDocument().create(email, name="%s %s"%(user.first_name, user.last_name))
         user.put()
 
     @property
