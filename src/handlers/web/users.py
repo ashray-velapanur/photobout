@@ -232,7 +232,7 @@ class AddFollowerHandler(webapp2.RequestHandler):
             Following.create(follower, following_email)
             logging.info(following.email)
             message = "%s is following you."%follower.name
-            util.send_push_notification(following.device_token, message)
+            util.send_push_notification(following.email, message)
             response = {"success": True}
         else:
             response = {"success": False, "error": "User does not exist."}

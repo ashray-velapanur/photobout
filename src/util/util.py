@@ -25,13 +25,19 @@ MAIL_TEMPLATES = {
     }
 }
 
-def send_push_notification(device_token, message):
+def send_push_notification(email, message):
+    device_token = User.get_by_key_name(email).device_token
     if device_token:
+        logging.info('... sending notification')
+        logging.info(email)
+        logging.info(message)
         apns = APNs(use_sandbox=False, cert_file='PhotoboutProdCert.pem', key_file='PhotoboutProdKeyNoEnc.pem')
         payload = Payload(alert=message, sound="default", badge=1)
-        logging.info('... sending notification')
-        logging.info(device_token)
         apns.gateway_server.send_notification(device_token, payload)
+
+def send_notifications(users, message):
+    for user in users:
+        deferred.defer(send_push_notification, user, message)
 
 def fetch_with_cursor(query, limit=10, cursor=None, mapper=None):
     response = {}

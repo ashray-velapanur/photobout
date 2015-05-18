@@ -17,6 +17,7 @@ from model.vote import Vote
 from model.comment import Comment
 from model.invited import Invited
 from model.notification import Notification
+from model.following import Following
 from util import util
 from search_documents.search_documents import BoutDocument
 
@@ -32,6 +33,9 @@ class CreateBoutHandler(webapp2.RequestHandler):
             permission = 1
         bout = Bout.create(user, name, description, period, permission)
         util.schedule_end(bout)
+        users = [following.email for following in Following.for_user(user)]
+        message = "%s created a new Bout %s"%(user.name, bout.name)
+        util.send_notifications(users, message)
         response = {'id': bout.id}
         self.response.write(json.dumps(response))
 
@@ -82,7 +86,7 @@ class PhotoVoteHandler(webapp2.RequestHandler):
         if Vote.update(email, photo, bout):
             Notification.create('photo_vote', bout.owner, user.email, bout)
             message = "%s voted on your photo in the Bout %s."%(user.name, bout.name)
-            util.send_push_notification(photo.user.device_token, message)
+            util.send_push_notification(photo.user.email, message)
             response = {"success": True, "voted": True}
         else:
             response = {"success": True, "voted": False}
