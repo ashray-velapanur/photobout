@@ -199,10 +199,11 @@ class GetProfilePictureHandler(blobstore_handlers.BlobstoreDownloadHandler):
     def get(self):
         email = self.request.get('email')
         user_picture = UserPicture.for_(email)
-        blob_key = user_picture.blob_key
-        if blob_key:
-            blob_info = blobstore.BlobInfo.get(blob_key)
-            self.send_blob(blob_info)
+        if user_picture:
+            blob_key = user_picture.blob_key
+            if blob_key:
+                blob_info = blobstore.BlobInfo.get(blob_key)
+                self.send_blob(blob_info)
 
 class AddProfilePicturePageHandler(webapp2.RequestHandler):
     @util.login_required
