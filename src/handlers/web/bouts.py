@@ -173,22 +173,17 @@ class AddInviteHandler(webapp2.RequestHandler):
     @util.login_required
     def post(self):
         ids_str = self.request.get('ids')
-        logging.info('Ids string: '+ids_str)
-        if ids_str:
-            ids = ids_str.split(';')
-            bout_id = self.request.get('bout_id')
-            if bout_id:
-                bout = Bout.get_by_id(long(bout_id))
-                invited_by = util.get_user_from_session()
-                if len(ids) > 0:
-                    for id in ids:
-                        user = User.get_by_key_name(id)
-                        if user:
-                            Invited(key_name=bout_id, parent=user, timestamp=datetime.datetime.now(), invited_by=invited_by).put()
-                            Notification.create('invited', user, invited_by.email, bout)
-                else:
-                    Bout.update(id=bout_id, permission=1)
-        self.response.write(json.dumps('Invitations sent'))
+        ids = [id for id in ids_str.split(';') if len(id) > 0]
+        bout_id = self.request.get('bout_id')
+        if len(ids) <= 0:
+            Bout.update(id=bout_id, permission=1)
+            return
+        invited_by = util.get_user_from_session()
+        bout = Bout.get_by_id(long(bout_id))
+        for id in ids:
+            user = User.get_by_key_name(id)
+            Invited(key_name=bout_id, parent=user, timestamp=datetime.datetime.now(), invited_by=invited_by).put()
+            Notification.create('invited', user, invited_by.email, bout)
 
 class GetInvitesHandler(webapp2.RequestHandler):
     @util.login_required
