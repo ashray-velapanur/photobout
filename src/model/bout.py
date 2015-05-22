@@ -26,7 +26,7 @@ class Bout(db.Model):
     def update(cls, id, permission=None):
         bout = cls.get_by_id(long(id))
         if permission:
-            bout.permission = permission
+            bout.permission = int(permission)
         bout.put()
     
     @property

@@ -279,7 +279,7 @@ class UpdateBoutsHandler(webapp2.RequestHandler):
         bout_id = self.request.get('bout_id')
         permission = self.request.get('permission')
         email = util.get_email_from_session()
-        bout = Bout.get_by_key_name(bout_id)
+        bout = Bout.get_by_id(long(bout_id))
         if bout.owner.email == email:
             Bout.update(bout_id, permission)
 
