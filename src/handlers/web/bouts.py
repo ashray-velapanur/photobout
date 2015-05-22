@@ -275,7 +275,7 @@ class BoutSearchHandler(webapp2.RequestHandler):
 class UpdateBoutsHandler(webapp2.RequestHandler):
     @util.login_required
     @util.bout_permission_required
-    def get(self):
+    def post(self):
         bout_id = self.request.get('bout_id')
         permission = self.request.get('permission')
         email = util.get_email_from_session()
