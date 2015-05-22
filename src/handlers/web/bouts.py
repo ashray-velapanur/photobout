@@ -230,27 +230,27 @@ class GetBoutsHandler(webapp2.RequestHandler):
         self.response.write(json.dumps(response))
 
 def _get_open_bouts(bout):
-    email = util.get_email_from_session()
+    user = util.get_user_from_session()
     if bout.permission == 2:
-        if bout.owner.email != email:
+        if bout.owner.email != user.email or not Invited.for_(user, bout):
             return
-    return util.make_bout_dict(bout, email)
+    return util.make_bout_dict(bout, user.email)
 
 def _get_past_bouts(bout):
-    email = util.get_email_from_session()
+    user = util.get_user_from_session()
     if bout.permission == 2:
-        if bout.owner.email != email:
+        if bout.owner.email != user.email or not Invited.for_(user, bout):
             return
-    return util.make_bout_dict(bout, email)
+    return util.make_bout_dict(bout, user.email)
 
 def _get_current_bouts(bout):
-    email = util.get_email_from_session()
+    user = util.get_user_from_session()
     if bout.permission == 2:
-        if bout.owner.email != email:
+        if bout.owner.email != user.email or not Invited.for_(user, bout):
             return
     if not Photo.get_by_key_name(email, parent=bout):
         return
-    return util.make_bout_dict(bout, email)
+    return util.make_bout_dict(bout, user.email)
 
 class BoutSearchHandler(webapp2.RequestHandler):
     @util.login_required
