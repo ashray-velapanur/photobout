@@ -15,6 +15,7 @@ from model.comment import Comment
 from model.following import Following
 from model.notification import Notification
 from model.third_party_user import ThirdPartyUser
+from model.invited import Invited
 
 from PyAPNs.apns import APNs, Frame, Payload
 
@@ -79,7 +80,7 @@ def make_bout_dict(bout, email, is_users_bouts=False):
     bout_dict['description'] = bout.description
     bout_dict['time_left'] = bout.time_left_string
     bout_dict['ended'] = bout.ended
-    bout_dict['can_join'] = True if bout.permission == 1 or Following.for_(bout.owner, email) or bout.owner.email == (get_email_from_session() if is_users_bouts else email) else False
+    bout_dict['can_join'] = True if bout.permission == 1 or Invited.for_(User.get_by_key_name(email), bout) or bout.owner.email == (get_email_from_session() if is_users_bouts else email) else False
     bout_dict['photos'] = []
     user_in_session = get_user_from_session()
     user_in_session_photo = Photo.for_bout_user(bout, user_in_session.email)
