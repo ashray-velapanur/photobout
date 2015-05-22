@@ -59,6 +59,18 @@ def send_mail(to, template, **kwargs):
     sender = "support@b-eagles.com"
     mail.send_mail(sender=sender, to=to, subject=subject, body=body)
 
+def make_photo_dict(photo, email):
+    photo_dict = {}
+    owner = User.get_by_key_name(photo.owner_email)
+    photo_dict['image'] = photo.image_url
+    photo_dict['owner_email'] = photo.owner_email
+    photo_dict['owner_first_name'] = owner.first_name
+    photo_dict['owner_last_name'] = owner.last_name
+    photo_dict['num_votes'] = Vote.count(photo)
+    photo_dict['is_voted'] = Vote.is_voted(email, photo)
+    photo_dict['profile_picture'] = owner.profile_picture
+    return photo_dict
+
 def make_bout_dict(bout, email, is_users_bouts=False):
     bout_dict = {}
     bout_dict['id'] = bout.id
@@ -69,17 +81,15 @@ def make_bout_dict(bout, email, is_users_bouts=False):
     bout_dict['num_comments'] = len(Comment.for_(bout))
     bout_dict['can_join'] = True if bout.permission == 1 or Following.for_(bout.owner, email) or bout.owner.email == (get_email_from_session() if is_users_bouts else email) else False
     bout_dict['photos'] = []
-    for photo in sorted(Photo.for_(bout), key=lambda x: Vote.count(x), reverse=True):
-        photo_dict = {}
-        owner = User.get_by_key_name(photo.owner_email)
-        photo_dict['image'] = photo.image_url
-        photo_dict['owner_email'] = photo.owner_email
-        photo_dict['owner_first_name'] = owner.first_name
-        photo_dict['owner_last_name'] = owner.last_name
-        photo_dict['num_votes'] = Vote.count(photo)
-        photo_dict['is_voted'] = Vote.is_voted(email, photo)
-        photo_dict['profile_picture'] = owner.profile_picture
+    user_in_session = get_user_from_session()
+    user_in_session_photo = Photo.for_bout_user(bout, user_in_session)
+    if user_in_session_photo:
+        photo_dict = make_photo_dict(user_in_session_photo, email)
         bout_dict['photos'].append(photo_dict)
+    for photo in sorted(Photo.for_(bout), key=lambda x: Vote.count(x), reverse=True):
+        if photo.owner_email != user_in_session.email:
+            photo_dict = make_photo_dict(photo, email)
+            bout_dict['photos'].append(photo_dict)
     if bout.ended:
         bout_dict['winners'] = []
         winners = Winner.for_bout(bout)
