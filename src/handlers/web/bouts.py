@@ -6,6 +6,7 @@ import datetime
 from gaesessions import get_current_session
 from google.appengine.ext import db
 from google.appengine.ext import blobstore
+from google.appengine.ext import deferred
 from google.appengine.ext.webapp import template
 from google.appengine.ext.webapp import blobstore_handlers
 
@@ -44,6 +45,15 @@ class CreateBoutHandler(webapp2.RequestHandler):
         path = 'templates/create_bout.html'
         self.response.out.write(template.render(path, template_values))
 
+def send_add_photo_notifications(bout, from_user_email):
+    if bout and from_user_email:
+        Notification.create('photo_add', bout.owner, from_user_email, bout)
+        photos = Photo.for_(bout)
+        if len(photos)>0:
+            for photo in photos:
+                if photo.owner_email != from_user_email and photo.owner_email != bout.owner.email:
+                    Notification.create('photo_add', photo.user, from_user_email, bout)
+
 class AddPhotoHandler(blobstore_handlers.BlobstoreUploadHandler):
     @util.login_required
     @util.bout_permission_required
@@ -58,7 +68,7 @@ class AddPhotoHandler(blobstore_handlers.BlobstoreUploadHandler):
             if len(votes) > 0:
                 db.delete(votes)
         Photo.create(bout, user, image_blob_key)
-        Notification.create('photo_add', bout.owner, user.email, bout)
+        deferred.defer(send_add_photo_notifications, bout, user.email)
         
     @util.login_required
     def get(self):
