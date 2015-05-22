@@ -272,6 +272,17 @@ class BoutSearchHandler(webapp2.RequestHandler):
                         response.append(util.make_bout_dict(bout, email))
         self.response.write(json.dumps(response))
 
+class UpdateBoutsHandler(webapp2.RequestHandler):
+    @util.login_required
+    @util.bout_permission_required
+    def get(self):
+        bout_id = self.request.get('bout_id')
+        permission = self.request.get('permission')
+        email = util.get_email_from_session()
+        bout = Bout.get_by_key_name(bout_id)
+        if bout.owner.email == email:
+            Bout.update(bout_id, permission)
+
 class TestHandler(webapp2.RequestHandler):
     @util.login_required
     @util.bout_permission_required
@@ -280,6 +291,7 @@ class TestHandler(webapp2.RequestHandler):
 
 application = webapp2.WSGIApplication([ ('/bouts/create', CreateBoutHandler),
                                         ('/bouts/get', GetBoutsHandler),
+                                        ('/bouts/update', UpdateBoutsHandler),
                                         ('/bouts/test', TestHandler),
                                         ('/bouts/search', BoutSearchHandler),
                                         ('/bouts/leaderboard', LeaderboardHandler),

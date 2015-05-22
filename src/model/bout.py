@@ -22,6 +22,13 @@ class Bout(db.Model):
         BoutDocument().create(bout.id, name=name, description=description, suggestions=name)
         return bout
 
+    @classmethod
+    def update(cls, id, permission=None):
+        bout = cls.get_by_id(long(id))
+        if permission:
+            bout.permission = permission
+        bout.put()
+    
     @property
     def id(self):
         return self.key().id()
