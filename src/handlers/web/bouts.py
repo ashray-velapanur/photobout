@@ -31,7 +31,7 @@ class CreateBoutHandler(webapp2.RequestHandler):
         permission = self.request.get('permission')
         description = self.request.get('description')
         if not permission:
-            permission = 1
+            permission = 2
         bout = Bout.create(user, name, description, period, permission)
         util.schedule_end(bout)
         users = [following.email for following in Following.for_user(user)]
@@ -186,6 +186,8 @@ class AddInviteHandler(webapp2.RequestHandler):
                         if user:
                             Invited(key_name=bout_id, parent=user, timestamp=datetime.datetime.now(), invited_by=invited_by).put()
                             Notification.create('invited', user, invited_by.email, bout)
+                else:
+                    Bout.update(id=bout_id, permission=1)
         self.response.write(json.dumps('Invitations sent'))
 
 class GetInvitesHandler(webapp2.RequestHandler):
