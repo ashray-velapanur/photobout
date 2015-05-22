@@ -13,6 +13,7 @@ from model.winner import Winner
 from model.bout import Bout
 from model.comment import Comment
 from model.following import Following
+from model.invited import Invited
 from model.notification import Notification
 from model.third_party_user import ThirdPartyUser
 from model.invited import Invited
@@ -130,8 +131,9 @@ def _user_has_permission(handler):
     if bout.owner.email == email:
         logging.info('... is owner')
         return True
-    if Following.for_(bout.owner, email):
-        logging.info('... following')
+    user = User.get_by_key_name(email)
+    if Invited.for_(user, bout):
+        logging.info('... invited')
         return True
     logging.info('... no permission')
     return False
