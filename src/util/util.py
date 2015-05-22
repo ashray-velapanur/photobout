@@ -82,7 +82,7 @@ def make_bout_dict(bout, email, is_users_bouts=False):
     bout_dict['can_join'] = True if bout.permission == 1 or Following.for_(bout.owner, email) or bout.owner.email == (get_email_from_session() if is_users_bouts else email) else False
     bout_dict['photos'] = []
     user_in_session = get_user_from_session()
-    user_in_session_photo = Photo.for_bout_user(bout, user_in_session)
+    user_in_session_photo = Photo.for_bout_user(bout, user_in_session.email)
     if user_in_session_photo:
         photo_dict = make_photo_dict(user_in_session_photo, email)
         bout_dict['photos'].append(photo_dict)
