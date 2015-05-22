@@ -62,7 +62,7 @@ class AddPhotoHandler(blobstore_handlers.BlobstoreUploadHandler):
         bout_id = long(self.request.get('bout_id'))
         image_blob_key = str(self.get_uploads()[0].key())
         bout = Bout.get_by_id(bout_id)
-        photo = Photo.for_bout_user(bout, user)
+        photo = Photo.for_bout_user(bout, user.email)
         if photo:
             votes = Vote.for_photo(photo)
             if len(votes) > 0:
@@ -114,10 +114,12 @@ class AddCommentHandler(webapp2.RequestHandler):
     def post(self):
         user = util.get_user_from_session()
         message = self.request.get('message')
-        bout_id = long(self.request.get('bout_id'))
-        bout = Bout.get_by_id(bout_id)
-        Comment.create(user, bout, message)
-        Notification.create('comment_add', bout.owner, user.email, bout)
+        owner_email = self.request.get('owner_email')
+        bout_id = self.request.get('bout_id')
+        bout = Bout.get_by_id(long(bout_id))
+        photo = Photo.for_bout_user(bout, owner_email)
+        Comment.create(user, photo, message)
+        Notification.create('comment_add', photo.bout.owner, user.email, bout)
 
     def get(self):
         template_values = {}
@@ -138,9 +140,11 @@ class GetCommentsHandler(webapp2.RequestHandler):
     @util.login_required
     def get(self):
         next = self.request.get('next')
+        owner_email = self.request.get('owner_email')
         bout_id = long(self.request.get('bout_id'))
         bout = Bout.get_by_id(bout_id)
-        response = util.fetch_with_cursor(Comment.all().ancestor(bout).order("-timestamp"), limit=20, cursor=next, mapper=make_comment_dict)
+        photo = Photo.for_bout_user(bout, owner_email)
+        response = util.fetch_with_cursor(Comment.all().ancestor(photo).order("-timestamp"), limit=20, cursor=next, mapper=make_comment_dict)
         self.response.write(json.dumps(response))
 
 class LeaderboardHandler(webapp2.RequestHandler):

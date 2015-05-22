@@ -15,8 +15,8 @@ class Photo(db.Model):
         return cls.all().ancestor(bout).fetch(None)
 
     @classmethod
-    def for_bout_user(cls, bout, user):
-        return cls.get_by_key_name(user.email, parent=bout)
+    def for_bout_user(cls, bout, owner_email):
+        return cls.get_by_key_name(owner_email, parent=bout)
 
     @classmethod
     def for_user_(cls, user):

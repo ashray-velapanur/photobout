@@ -8,12 +8,12 @@ class Comment(db.Model):
     timestamp = db.DateTimeProperty(indexed=True)
 
     @classmethod
-    def create(cls, user, bout, message):
-        cls(parent=bout, user=user, message=message, timestamp=datetime.datetime.now()).put()
+    def create(cls, user, photo, message):
+        cls(parent=photo, user=user, message=message, timestamp=datetime.datetime.now()).put()
 
     @classmethod
-    def for_(cls, bout):
-        return cls.all().ancestor(bout).fetch(None)
+    def for_(cls, photo):
+        return cls.all().ancestor(photo).fetch(None)
 
     @property
     def formatted_timestamp(self):
