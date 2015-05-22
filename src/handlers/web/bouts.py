@@ -170,16 +170,18 @@ class AddInviteHandler(webapp2.RequestHandler):
     def post(self):
         ids_str = self.request.get('ids')
         logging.info('Ids string: '+ids_str)
-        ids = ids_str.split(';')
-        bout_id = self.request.get('bout_id')
-        invited_by = util.get_user_from_session()
-        for id in ids:
-            tpu = ThirdPartyUser.for_network_id(id)
-            if tpu:
-                user = tpu.user
+        if ids_str:
+            ids = ids_str.split(';')
+            bout_id = self.request.get('bout_id')
+            if bout_id:
                 bout = Bout.get_by_id(long(bout_id))
-                Invited(key_name=bout_id, parent=user, timestamp=datetime.datetime.now(), invited_by=invited_by).put()
-                Notification.create('invited', user, invited_by.email, bout)
+                invited_by = util.get_user_from_session()
+                if len(ids) > 0:
+                    for id in ids:
+                        user = User.get_by_key_name(id)
+                        if user:
+                            Invited(key_name=bout_id, parent=user, timestamp=datetime.datetime.now(), invited_by=invited_by).put()
+                            Notification.create('invited', user, invited_by.email, bout)
         self.response.write(json.dumps('Invitations sent'))
 
 class GetInvitesHandler(webapp2.RequestHandler):
