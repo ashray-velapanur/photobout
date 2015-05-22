@@ -231,22 +231,28 @@ class GetBoutsHandler(webapp2.RequestHandler):
 
 def _get_open_bouts(bout):
     user = util.get_user_from_session()
+    logging.info(bout.id)
     if bout.permission == 2:
-        if bout.owner.email != user.email or not Invited.for_(user, bout):
+        if bout.owner.email != user.email and not Invited.for_(user, bout):
+            logging.info('... no permission')
             return
     return util.make_bout_dict(bout, user.email)
 
 def _get_past_bouts(bout):
     user = util.get_user_from_session()
+    logging.info(bout.id)
     if bout.permission == 2:
-        if bout.owner.email != user.email or not Invited.for_(user, bout):
+        if bout.owner.email != user.email and not Invited.for_(user, bout):
+            logging.info('... no permission')
             return
     return util.make_bout_dict(bout, user.email)
 
 def _get_current_bouts(bout):
     user = util.get_user_from_session()
+    logging.info(bout.id)
     if bout.permission == 2:
-        if bout.owner.email != user.email or not Invited.for_(user, bout):
+        if bout.owner.email != user.email and not Invited.for_(user, bout):
+            logging.info('... no permission')
             return
     if not Photo.get_by_key_name(email, parent=bout):
         return
