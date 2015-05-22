@@ -90,6 +90,7 @@ class GetPhotoHandler(blobstore_handlers.BlobstoreDownloadHandler):
 
 class PhotoVoteHandler(webapp2.RequestHandler):
     @util.login_required
+    @util.bout_permission_required
     def post(self):
         response = {}
         user = util.get_user_from_session()
@@ -111,6 +112,7 @@ class PhotoVoteHandler(webapp2.RequestHandler):
 
 class AddCommentHandler(webapp2.RequestHandler):
     @util.login_required
+    @util.bout_permission_required
     def post(self):
         user = util.get_user_from_session()
         message = self.request.get('message')
@@ -138,6 +140,7 @@ def make_comment_dict(comment):
 
 class GetCommentsHandler(webapp2.RequestHandler):
     @util.login_required
+    @util.bout_permission_required
     def get(self):
         next = self.request.get('next')
         owner_email = self.request.get('owner_email')
@@ -149,6 +152,7 @@ class GetCommentsHandler(webapp2.RequestHandler):
 
 class LeaderboardHandler(webapp2.RequestHandler):
     @util.login_required
+    @util.bout_permission_required
     def get(self):
         response = []
         bout_id = long(self.request.get('bout_id'))
@@ -230,14 +234,23 @@ class GetBoutsHandler(webapp2.RequestHandler):
 
 def _get_open_bouts(bout):
     email = util.get_email_from_session()
+    if bout.permission == 2:
+        if bout.owner.email != email:
+            return
     return util.make_bout_dict(bout, email)
 
 def _get_past_bouts(bout):
     email = util.get_email_from_session()
+    if bout.permission == 2:
+        if bout.owner.email != email:
+            return
     return util.make_bout_dict(bout, email)
 
 def _get_current_bouts(bout):
     email = util.get_email_from_session()
+    if bout.permission == 2:
+        if bout.owner.email != email:
+            return
     if not Photo.get_by_key_name(email, parent=bout):
         return
     return util.make_bout_dict(bout, email)
