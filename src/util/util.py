@@ -67,6 +67,7 @@ def make_photo_dict(photo, email):
     photo_dict['owner_first_name'] = owner.first_name
     photo_dict['owner_last_name'] = owner.last_name
     photo_dict['num_votes'] = Vote.count(photo)
+    photo_dict['num_comments'] = len(Comment.for_(photo))
     photo_dict['is_voted'] = Vote.is_voted(email, photo)
     photo_dict['profile_picture'] = owner.profile_picture
     return photo_dict
@@ -78,7 +79,6 @@ def make_bout_dict(bout, email, is_users_bouts=False):
     bout_dict['description'] = bout.description
     bout_dict['time_left'] = bout.time_left_string
     bout_dict['ended'] = bout.ended
-    bout_dict['num_comments'] = len(Comment.for_(bout))
     bout_dict['can_join'] = True if bout.permission == 1 or Following.for_(bout.owner, email) or bout.owner.email == (get_email_from_session() if is_users_bouts else email) else False
     bout_dict['photos'] = []
     user_in_session = get_user_from_session()
