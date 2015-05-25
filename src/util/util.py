@@ -84,13 +84,12 @@ def make_bout_dict(bout, email):
     bout_dict['time_left'] = bout.time_left_string
     bout_dict['ended'] = bout.ended
     bout_dict['photos'] = []
-    user_in_session = get_user_from_session()
-    user_in_session_photo = Photo.for_bout_user(bout, user_in_session.email)
+    user_in_session_photo = Photo.for_bout_user(bout, email)
     if user_in_session_photo:
         photo_dict = make_photo_dict(user_in_session_photo, email)
         bout_dict['photos'].append(photo_dict)
     for photo in sorted(Photo.for_(bout), key=lambda x: Vote.count(x), reverse=True):
-        if photo.owner_email != user_in_session.email:
+        if photo.owner_email != email:
             photo_dict = make_photo_dict(photo, email)
             bout_dict['photos'].append(photo_dict)
     if bout.ended:
