@@ -20,6 +20,7 @@ from model.invited import Invited
 from model.notification import Notification
 from model.following import Following
 from util import util
+from util.util import send_push_notification
 from search_documents.search_documents import BoutDocument
 
 class CreateBoutHandler(webapp2.RequestHandler):
@@ -34,7 +35,7 @@ class CreateBoutHandler(webapp2.RequestHandler):
             permission = 2
         bout = Bout.create(user, name, description, period, permission)
         util.schedule_end(bout)
-        if permission == 1:
+        if int(permission) == 1:
             users = [following.email for following in Following.for_user(user)]
             message = "%s created a new Bout %s"%(user.name, bout.name)
             util.send_notifications(users, message, bout.id)
@@ -185,6 +186,8 @@ class AddInviteHandler(webapp2.RequestHandler):
             user = User.get_by_key_name(id)
             Invited(key_name=bout_id, parent=user, timestamp=datetime.datetime.now(), invited_by=invited_by).put()
             Notification.create('invited', user, invited_by.email, bout)
+            message = "%s invited you to the bout %s"%(invited_by.name, bout.name)
+            deferred.defer(send_push_notification, user.email, message, bout_id)
 
 class GetInvitesHandler(webapp2.RequestHandler):
     @util.login_required
