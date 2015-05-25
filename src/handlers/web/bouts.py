@@ -34,9 +34,10 @@ class CreateBoutHandler(webapp2.RequestHandler):
             permission = 2
         bout = Bout.create(user, name, description, period, permission)
         util.schedule_end(bout)
-        users = [following.email for following in Following.for_user(user)]
-        message = "%s created a new Bout %s"%(user.name, bout.name)
-        util.send_notifications(users, message, bout.id)
+        if permission == 1:
+            users = [following.email for following in Following.for_user(user)]
+            message = "%s created a new Bout %s"%(user.name, bout.name)
+            util.send_notifications(users, message, bout.id)
         response = {'id': bout.id}
         self.response.write(json.dumps(response))
 
