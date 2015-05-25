@@ -128,7 +128,8 @@ class AddCommentHandler(webapp2.RequestHandler):
         path = 'templates/add_comment.html'
         self.response.out.write(template.render(path, template_values))
 
-def make_comment_dict(comment):
+def make_comment_dict(params):
+    comment = params['result']
     comment_dict = {}
     comment_dict['first_name'] = comment.user.first_name
     comment_dict['last_name'] = comment.user.last_name
@@ -216,42 +217,40 @@ class GetBoutsHandler(webapp2.RequestHandler):
         next = self.request.get('next')
         status = self.request.get('status')
         bout_id = self.request.get('bout_id')
+        user = util.get_user_from_session()
         if bout_id:
-            email = util.get_email_from_session()
+            email = user.email
             bout = Bout.get_by_id(long(bout_id))
             response = [util.make_bout_dict(bout, email)]
         elif status == 'current':
-            response = util.fetch_with_cursor(Bout.all().filter('status', 1).order("-created_at"), cursor=next, mapper=_get_current_bouts)
+            response = util.fetch_with_cursor(Bout.all().filter('status', 1).order("-created_at"), cursor=next, mapper=_get_current_bouts, mapper_params={'user': user})
         elif status == 'past':
-            response = util.fetch_with_cursor(Bout.all().filter('status', 2).order("-created_at"), cursor=next, mapper=_get_past_bouts)
+            response = util.fetch_with_cursor(Bout.all().filter('status', 2).order("-created_at"), cursor=next, mapper=_get_past_bouts, mapper_params={'user': user})
         else:
-            response = util.fetch_with_cursor(Bout.all().filter('status', 1).order("-created_at"), cursor=next, mapper=_get_open_bouts)
+            response = util.fetch_with_cursor(Bout.all().filter('status', 1).order("-created_at"), cursor=next, mapper=_get_open_bouts, mapper_params={'user': user})
         self.response.write(json.dumps(response))
 
-def _get_open_bouts(bout):
-    user = util.get_user_from_session()
-    logging.info(bout.id)
+def _get_open_bouts(params):
+    user = params['user']
+    bout = params['result']
     if bout.permission == 2:
         if bout.owner.email != user.email and not Invited.for_(user, bout):
-            logging.info('... no permission')
             return
     return util.make_bout_dict(bout, user.email)
 
-def _get_past_bouts(bout):
-    user = util.get_user_from_session()
-    logging.info(bout.id)
+def _get_past_bouts(params):
+    user = params['user']
+    bout = params['result']
     if bout.permission == 2:
         if bout.owner.email != user.email and not Invited.for_(user, bout):
-            logging.info('... no permission')
             return
     return util.make_bout_dict(bout, user.email)
 
-def _get_current_bouts(bout):
-    user = util.get_user_from_session()
-    logging.info(bout.id)
+def _get_current_bouts(params):
+    user = params['user']
+    bout = params['result']
     if bout.permission == 2:
         if bout.owner.email != user.email and not Invited.for_(user, bout):
-            logging.info('... no permission')
             return
     if not Photo.get_by_key_name(user.email, parent=bout):
         return

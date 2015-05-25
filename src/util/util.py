@@ -42,13 +42,14 @@ def send_notifications(users, message, bout_id=None):
     for user in users:
         deferred.defer(send_push_notification, user, message, bout_id)
 
-def fetch_with_cursor(query, limit=10, cursor=None, mapper=None):
+def fetch_with_cursor(query, limit=10, cursor=None, mapper=None, mapper_params={}):
     response = {}
     response['data'] = []
     if cursor:
         query.with_cursor(start_cursor=cursor)
     for count, result in enumerate(query):
-        mapper_response = mapper(result)
+        mapper_params['result'] = result
+        mapper_response = mapper(mapper_params)
         if mapper_response:
             response['data'].append(mapper_response)
             if count >= limit - 1:

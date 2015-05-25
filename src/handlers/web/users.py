@@ -155,7 +155,8 @@ class UsersWinsHandler(webapp2.RequestHandler):
         self.response.write(json.dumps(response))
 
 
-def make_notification_dict(notification):
+def make_notification_dict(params):
+    notification = params['result']
     notification_type = notification.notification_type
     if not notification_type == 'winner':
         current_user = util.get_user_from_session()
