@@ -176,7 +176,6 @@ class AddInviteHandler(webapp2.RequestHandler):
         ids = [id for id in ids_str.split(';') if len(id) > 0]
         bout_id = self.request.get('bout_id')
         if len(ids) <= 0:
-            Bout.update(id=bout_id, permission=1)
             return
         invited_by = util.get_user_from_session()
         bout = Bout.get_by_id(long(bout_id))
