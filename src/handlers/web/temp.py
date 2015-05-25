@@ -7,8 +7,10 @@ class NotifHandler(webapp2.RequestHandler):
     def get(self):
         apns = APNs(use_sandbox=True, cert_file='PhotoboutCert.pem', key_file='PhotoboutKeyNoEnc.pem')
         logging.info('Instantiated APNs')
-        token_hex = 'a79449feaa2668545a43f128e531ffa63454007942b8002888ee9bf1d739c7a5'
-        payload = Payload(alert="asdasd Hello World!", sound="default", badge=1)
+        message = self.request.get('message')
+        token_hex = '879825c6931847225caf5f015e9605b415d7c3688c7b4c548a77cb6ad65e2f94'
+        bout_id = '4794405554749440'
+        payload = Payload(alert=message, sound="default", badge=1, custom={'bid':bout_id})
         apns.gateway_server.send_notification(token_hex, payload)
         logging.info('... feedback_server')
         logging.info(apns.feedback_server)
