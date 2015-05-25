@@ -36,7 +36,7 @@ class CreateBoutHandler(webapp2.RequestHandler):
         util.schedule_end(bout)
         users = [following.email for following in Following.for_user(user)]
         message = "%s created a new Bout %s"%(user.name, bout.name)
-        util.send_notifications(users, message)
+        util.send_notifications(users, message, bout.id)
         response = {'id': bout.id}
         self.response.write(json.dumps(response))
 
@@ -102,7 +102,7 @@ class PhotoVoteHandler(webapp2.RequestHandler):
         if Vote.update(email, photo, bout):
             Notification.create('photo_vote', bout.owner, user.email, bout)
             message = "%s voted on your photo in the Bout %s."%(user.name, bout.name)
-            util.send_push_notification(photo.user.email, message)
+            util.send_push_notification(photo.user.email, message, bout.id)
             response = {"success": True, "voted": True}
         else:
             response = {"success": True, "voted": False}
