@@ -143,7 +143,7 @@ class UsersBoutsHandler(webapp2.RequestHandler):
         user_id = self.request.get('user_id')
         user = User.get_by_key_name(user_id)
         photos = Photo.all().filter('user', user).fetch(20)
-        response = [util.make_bout_dict(photo.bout, user.email, is_users_bouts=True) for photo in photos]
+        response = [util.make_bout_dict(photo.bout, user.email) for photo in photos]
         self.response.write(json.dumps(response))
 
 class UsersWinsHandler(webapp2.RequestHandler):

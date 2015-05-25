@@ -76,14 +76,13 @@ def make_photo_dict(photo, email):
     photo_dict['profile_picture'] = owner.profile_picture
     return photo_dict
 
-def make_bout_dict(bout, email, is_users_bouts=False):
+def make_bout_dict(bout, email):
     bout_dict = {}
     bout_dict['id'] = bout.id
     bout_dict['name'] = bout.name
     bout_dict['description'] = bout.description
     bout_dict['time_left'] = bout.time_left_string
     bout_dict['ended'] = bout.ended
-    bout_dict['can_join'] = True if bout.permission == 1 or Invited.for_(User.get_by_key_name(email), bout) or bout.owner.email == (get_email_from_session() if is_users_bouts else email) else False
     bout_dict['photos'] = []
     user_in_session = get_user_from_session()
     user_in_session_photo = Photo.for_bout_user(bout, user_in_session.email)
