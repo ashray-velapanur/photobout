@@ -45,6 +45,7 @@ def send_notifications(users, message, bout_id=None):
 def fetch_with_cursor(query, limit=10, cursor=None, mapper=None, mapper_params={}):
     response = {}
     response['data'] = []
+    response['next'] = None
     if cursor:
         query.with_cursor(start_cursor=cursor)
     for count, result in enumerate(query):
@@ -52,9 +53,9 @@ def fetch_with_cursor(query, limit=10, cursor=None, mapper=None, mapper_params={
         mapper_response = mapper(mapper_params)
         if mapper_response:
             response['data'].append(mapper_response)
-            if count >= limit - 1:
-                break
-    response['next'] = None if len(response['data']) < limit else query.cursor()
+        if count >= limit - 1:
+            response['next'] = query.cursor()
+            break
     return response
 
 def send_mail(to, template, **kwargs):
