@@ -79,9 +79,11 @@ class LoginHandler(webapp2.RequestHandler):
             device_token = self.request.get('token_hex')
             if not user:
                 user = User.create(email, profile['first_name'], profile['last_name'], device_token)
-            ThirdPartyUser.create('FB', user, access_token, id)
-            profile_picture = self.get_profile_picture(id)
-            User.update(email, profile_picture=profile_picture, device_token=device_token)
+                ThirdPartyUser.create('FB', user, access_token, id)
+                profile_picture = self.get_profile_picture(id)
+                User.update(email, profile_picture=profile_picture, device_token=device_token)
+            else:
+                User.update(email, device_token=device_token)
             util.set_session(email)
             response = {"success": True, "email": email, "first_name": user.first_name, "last_name": user.last_name}
         return response
