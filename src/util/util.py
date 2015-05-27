@@ -46,16 +46,19 @@ def fetch_with_cursor(query, limit=10, cursor=None, mapper=None, mapper_params={
     response = {}
     response['data'] = []
     response['next'] = None
+    count = 0
     if cursor:
         query.with_cursor(start_cursor=cursor)
-    for count, result in enumerate(query):
+    remaining_count = query.count()
+    for result in query:
         mapper_params['result'] = result
         mapper_response = mapper(mapper_params)
         if mapper_response:
             response['data'].append(mapper_response)
-        if count >= limit - 1:
-            response['next'] = query.cursor()
-            break
+            count += 1
+            if count >= limit:
+                break
+    response['next'] = None if remaining_count <= limit else query.cursor()
     return response
 
 def send_mail(to, template, **kwargs):
