@@ -161,13 +161,6 @@ class UsersWinsHandler(webapp2.RequestHandler):
 def make_notification_dict(params):
     notification = params['result']
     notification_type = notification.notification_type
-    if not notification_type == 'winner':
-        current_user = util.get_user_from_session()
-        if current_user:
-            current_user_email = current_user.email
-            notification_from_user_email = notification.from_user
-            if current_user_email == notification_from_user_email:
-                return None
     bout = notification.bout
     from_user = User.get_by_key_name(notification.from_user)
     notification_dict = {}
