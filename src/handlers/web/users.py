@@ -162,12 +162,13 @@ def make_notification_dict(params):
     notification = params['result']
     notification_type = notification.notification_type
     bout = notification.bout
+    current_user = util.get_email_from_session()
     from_user = User.get_by_key_name(notification.from_user)
     notification_dict = {}
+    notification_dict['from_name'] = 'You' if notification_type == 'winner' or current_user == from_user.email else from_user.name
     notification_dict['type'] = notification_type
     notification_dict['timestamp'] = notification.formatted_timestamp
     notification_dict['profile_picture'] = from_user.profile_picture
-    notification_dict['from_name'] = 'You' if notification_type == 'winner' else from_user.name
     notification_dict['bout'] = bout.id
     notification_dict['message'] = notification.message + ' ' + bout.name
     return notification_dict
