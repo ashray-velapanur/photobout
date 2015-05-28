@@ -139,6 +139,36 @@ class LogoutHandler(webapp2.RequestHandler):
         session = get_current_session()
         session.terminate()
 
+def user_bout_dict_mapper(params):
+    photo = params['result']
+    user_email = params['user_email']
+    return util.make_bout_dict(photo.bout, user_email)
+
+def user_win_bout_dict_mapper(params):
+    win = params['result']
+    user_email = params['user_email']
+    return util.make_bout_dict(win.bout, user_email)
+
+class TempUsersBoutsHandler(webapp2.RequestHandler):
+    @util.login_required
+    def get(self):
+        next_cursor = self.request.get('next')
+        user_id = self.request.get('user_id')
+        user = User.get_by_key_name(user_id)
+        current_user_email = util.get_email_from_session()
+        response = util.fetch_with_cursor(Photo.all().filter('user', user), limit=10, cursor=next_cursor, mapper=user_bout_dict_mapper, mapper_params={'user_email':current_user_email})
+        self.response.write(json.dumps(response))
+
+class TempUsersWinsHandler(webapp2.RequestHandler):
+    @util.login_required
+    def get(self):
+        next_cursor = self.request.get('next')
+        user_id = self.request.get('user_id')
+        user = User.get_by_key_name(user_id)
+        current_user_email = util.get_email_from_session()
+        response = util.fetch_with_cursor(Winner.for_user(user), limit=10, cursor=next_cursor, mapper=user_win_bout_dict_mapper, mapper_params={'user_email':current_user_email})
+        self.response.write(json.dumps(response))
+
 class UsersBoutsHandler(webapp2.RequestHandler):
     @util.login_required
     def get(self):
@@ -156,7 +186,6 @@ class UsersWinsHandler(webapp2.RequestHandler):
         user = User.get_by_key_name(user_id)
         response = [util.make_bout_dict(win.bout, user.email) for win in Winner.for_user(user)]
         self.response.write(json.dumps(response))
-
 
 def make_notification_dict(params):
     notification = params['result']
@@ -329,6 +358,8 @@ application = webapp2.WSGIApplication([ ('/users/signup', SignupHandler),
                                         ('/users/list', ListUsersHandler),
                                         ('/users/bouts', UsersBoutsHandler),
                                         ('/users/wins', UsersWinsHandler),
+                                        ('/users/temp/bouts', TempUsersBoutsHandler),
+                                        ('/users/temp/wins', TempUsersWinsHandler),
                                         ('/users/([^/]+)/login', LoginHandler),
                                         ('/users/checksession', CheckSessionHandler),
                                         ('/users/search', UsersSearchHandler)], debug=True)
