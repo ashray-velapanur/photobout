@@ -142,12 +142,12 @@ class LogoutHandler(webapp2.RequestHandler):
 def user_bout_dict_mapper(params):
     photo = params['result']
     user_email = params['user_email']
-    return util.make_bout_dict(photo.bout, user_email)
+    return util.make_users_bout_dict(photo.bout, user_email)
 
 def user_win_bout_dict_mapper(params):
     win = params['result']
     user_email = params['user_email']
-    return util.make_bout_dict(win.bout, user_email)
+    return util.make_users_bout_dict(win.bout, user_email)
 
 class TempUsersBoutsHandler(webapp2.RequestHandler):
     @util.login_required
@@ -155,8 +155,7 @@ class TempUsersBoutsHandler(webapp2.RequestHandler):
         next_cursor = self.request.get('next')
         user_id = self.request.get('user_id')
         user = User.get_by_key_name(user_id)
-        current_user_email = util.get_email_from_session()
-        response = util.fetch_with_cursor(Photo.all().filter('user', user), limit=10, cursor=next_cursor, mapper=user_bout_dict_mapper, mapper_params={'user_email':current_user_email})
+        response = util.fetch_with_cursor(Photo.all().filter('user', user), limit=10, cursor=next_cursor, mapper=user_bout_dict_mapper, mapper_params={'user_email':user.email})
         self.response.write(json.dumps(response))
 
 class TempUsersWinsHandler(webapp2.RequestHandler):
@@ -165,8 +164,7 @@ class TempUsersWinsHandler(webapp2.RequestHandler):
         next_cursor = self.request.get('next')
         user_id = self.request.get('user_id')
         user = User.get_by_key_name(user_id)
-        current_user_email = util.get_email_from_session()
-        response = util.fetch_with_cursor(Winner.for_user(user), limit=10, cursor=next_cursor, mapper=user_win_bout_dict_mapper, mapper_params={'user_email':current_user_email})
+        response = util.fetch_with_cursor(Winner.all().filter('user', user), limit=10, cursor=next_cursor, mapper=user_win_bout_dict_mapper, mapper_params={'user_email':user.email})
         self.response.write(json.dumps(response))
 
 class UsersBoutsHandler(webapp2.RequestHandler):

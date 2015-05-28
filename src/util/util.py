@@ -101,6 +101,17 @@ def make_bout_dict(bout, email):
                 bout_dict['winners'].append(winner.email)
     return bout_dict
 
+def make_users_bout_dict(bout, email):
+    bout_dict = {}
+    bout_dict['id'] = bout.id
+    bout_dict['name'] = bout.name
+    bout_dict['photo'] = None
+    user_uploaded_photo = Photo.for_bout_user(bout, email)
+    if user_uploaded_photo:
+        bout_dict['photo'] = user_uploaded_photo.image_url
+    bout_dict['num_photos'] = Photo.all().ancestor(bout).count()
+    return bout_dict
+
 def schedule_end(bout):
     deferred.defer(set_winner, bout, _eta=bout.end_time)
 
