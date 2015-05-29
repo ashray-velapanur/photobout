@@ -35,17 +35,36 @@ class SearchDocument(object):
                 j+=1
         return ' '.join(a)
 
+    def fetch_with_cursor(self, query, cursor, **query_options):
+        result = self.index.search(query=search.Query(query_string=query,
+                                                      options=search.QueryOptions(cursor=cursor,**query_options)))
+        response = {}
+        response['results'] = prepare_search_response(result.results)
+        response['cursor'] = result.cursor.web_safe_string if result.cursor else None
+        return response
+
+    def fetch_with_web_safe_string(self, query, web_safe_string, **query_options):
+        cursor = search.Cursor(web_safe_string=web_safe_string) if web_safe_string else search.Cursor()
+        return self.fetch_with_cursor(query,
+                                      cursor,
+                                      **query_options)
+
     def fetch(self, string):
         results = self.index.search(string).results
-        response = []
-        for result in results:
-            result_dict = {}
-            result_dict['id'] = result.doc_id
-            result_dict['fields'] = {}
-            for field in result.fields:
-                result_dict['fields'][field.name] = field.value
-            response.append(result_dict)
-        return response
+        return prepare_search_response(results)
+
+
+def prepare_search_response(results):
+    response = []
+    for result in results:
+        result_dict = {}
+        result_dict['id'] = result.doc_id
+        result_dict['fields'] = {}
+        for field in result.fields:
+            result_dict['fields'][field.name] = field.value
+        response.append(result_dict)
+    return response
+
 
 class BoutDocument(SearchDocument):
     def __init__(self):

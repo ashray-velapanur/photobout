@@ -277,6 +277,27 @@ class BoutSearchHandler(webapp2.RequestHandler):
                         response.append(util.make_bout_dict(bout, email))
         self.response.write(json.dumps(response))
 
+class TempBoutSearchHandler(webapp2.RequestHandler):
+    @util.login_required
+    def get(self):
+        response = {}
+        response['bouts'] = []
+        name = self.request.get('name')
+        cursor = self.request.get('cursor')
+        search_resp = BoutDocument().fetch_with_web_safe_string(name, web_safe_string=cursor, limit=10)
+        results = search_resp['results']
+        if len(results) > 0:
+            user = util.get_user_from_session()
+            email = user.email
+            for result in results:
+                bout_id = str(result['id'])
+                if bout_id and len(bout_id) > 0:
+                    bout = Bout.get_by_id(long(bout_id))
+                    if bout:
+                        response['bouts'].append(util.make_bout_dict(bout, email))
+        response['cursor'] = search_resp['cursor']
+        self.response.write(json.dumps(response))
+
 class UpdateBoutsHandler(webapp2.RequestHandler):
     @util.login_required
     @util.bout_permission_required
@@ -299,6 +320,7 @@ application = webapp2.WSGIApplication([ ('/bouts/create', CreateBoutHandler),
                                         ('/bouts/update', UpdateBoutsHandler),
                                         ('/bouts/test', TestHandler),
                                         ('/bouts/search', BoutSearchHandler),
+                                        ('/bouts/temp/search', TempBoutSearchHandler),
                                         ('/bouts/leaderboard', LeaderboardHandler),
                                         ('/bouts/photos/add', AddPhotoHandler),
                                         ('/bouts/photos/add_page', AddPhotoPageHandler),

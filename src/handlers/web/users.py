@@ -130,6 +130,25 @@ class UsersSearchHandler(webapp2.RequestHandler):
                 response['users'].append(user_dict)
         self.response.write(json.dumps(response))
 
+class TempUsersSearchHandler(webapp2.RequestHandler):
+    def post(self):
+        response = {}
+        response['users'] = []
+        search_string = self.request.get('search_string')
+        cursor = self.request.get('cursor')
+        search_resp = UserDocument().fetch_with_web_safe_string(search_string, web_safe_string=cursor, limit=10)
+        results = search_resp['results']
+        for user in results:
+            user_obj = User.get_by_key_name(user['id'])
+            if user_obj:
+                user_dict = {}
+                user_dict['name'] = user['fields']['name']
+                user_dict['id'] = user['id']
+                user_dict['profile_picture'] = user_obj.profile_picture
+                response['users'].append(user_dict)
+        response['cursor'] = search_resp['cursor']
+        self.response.write(json.dumps(response))
+
 class LogoutHandler(webapp2.RequestHandler):
     @util.login_required
     def post(self):
@@ -360,4 +379,5 @@ application = webapp2.WSGIApplication([ ('/users/signup', SignupHandler),
                                         ('/users/temp/wins', TempUsersWinsHandler),
                                         ('/users/([^/]+)/login', LoginHandler),
                                         ('/users/checksession', CheckSessionHandler),
-                                        ('/users/search', UsersSearchHandler)], debug=True)
+                                        ('/users/search', UsersSearchHandler),
+                                        ('/users/temp/search', TempUsersSearchHandler)], debug=True)
