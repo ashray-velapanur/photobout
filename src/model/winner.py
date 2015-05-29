@@ -15,6 +15,10 @@ class Winner(db.Model):
     def for_bout(cls, bout):
         return cls.all().ancestor(bout).fetch(None)
 
+    @classmethod
+    def for_bout_user(cls, bout, user_email):
+        return cls.get_by_key_name(user_email, parent=bout)
+
     @property
     def bout(self):
         return self.parent()

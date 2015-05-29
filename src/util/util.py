@@ -106,11 +106,19 @@ def make_users_bout_dict(bout, email):
     bout_dict = {}
     bout_dict['id'] = bout.id
     bout_dict['name'] = bout.name
-    bout_dict['photo'] = None
+    bout_dict['photos'] = []
+    num_photos = Photo.all().ancestor(bout).count()
     user_uploaded_photo = Photo.for_bout_user(bout, email)
     if user_uploaded_photo:
-        bout_dict['photo'] = user_uploaded_photo.image_url
-    bout_dict['num_photos'] = Photo.all().ancestor(bout).count()
+        bout_dict['photos'].append({'image':user_uploaded_photo.image_url})
+        num_photos -= 1
+    for i in range(0, num_photos):
+        bout_dict['photos'].append({})
+    bout_dict['ended'] = bout.ended
+    if bout_dict['ended']:
+        bout_dict['winners'] = []
+        if Winner.for_bout_user(bout, email):
+            bout_dict['winners'].append(email)
     return bout_dict
 
 def schedule_end(bout):
