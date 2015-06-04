@@ -31,6 +31,8 @@ class SignupHandler(webapp2.RequestHandler):
         password = self.request.get('password')
         confirm_password = self.request.get('confirm_password')
         device_token = self.request.get('token_hex')
+        logging.info('Sign Up:: ')
+        logging.info(email)
         if password == confirm_password:
             user = User.get_by_key_name(email)
             if user:
@@ -51,6 +53,8 @@ class LoginHandler(webapp2.RequestHandler):
     def handle_custom_login(self):
         email = self.request.get('email')
         password = self.request.get('password')
+        logging.info('Custom Login:: ')
+        logging.info(email)
         user = User.get_by_key_name(email)
         device_token = self.request.get('token_hex')
         if user and self.check_password(email, password):
@@ -70,11 +74,16 @@ class LoginHandler(webapp2.RequestHandler):
         user_id = self.request.get('user_id')
         profile_url = 'https://graph.facebook.com/me?access_token=%s'
         profile = json.loads(urlfetch.fetch(profile_url%access_token).content)
+        logging.info('Facebook Login:: ')
+        logging.info(profile)
         id = profile['id']
         if not id == user_id:
             response = {"success": False, "error": "Facebook ids don't match."}
         else:
-            email = profile['email']
+            if 'email' in profile:
+                email = profile['email']
+            else:
+                email = id
             user = User.get_by_key_name(email)
             device_token = self.request.get('token_hex')
             if not user:
@@ -89,6 +98,8 @@ class LoginHandler(webapp2.RequestHandler):
         return response
 
     def post(self, network):
+        logging.info('Handling login for:: ')
+        logging.info(network)
         if network == 'custom':
             response = self.handle_custom_login()
         elif network == 'facebook':
