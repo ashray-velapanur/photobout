@@ -56,6 +56,9 @@ class LoginHandler(webapp2.RequestHandler):
         logging.info('Custom Login:: ')
         logging.info(email)
         user = User.get_by_key_name(email)
+        if user and ThirdPartyUser.for_user(user).count() > 0:
+            response = {"success": False, "error": "You have previously logged in with Facebook. Please log in using Facebook."}
+            return response
         device_token = self.request.get('token_hex')
         if user and self.check_password(email, password):
             User.update(email, device_token=device_token)
